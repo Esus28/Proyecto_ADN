@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Lista de Repartidores</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="/static/images/logo.png" alt="Logo">
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/dashboard">Inicio</a></li>
+                    <li><a href="/clientes">Lista de Clientes</a></li>
+                    <li><a href="/rutas">Lista de Rutas</a></li>
+                    <li><a href="/costos">Lista de Costos</a></li>
+                    <li><a href="/vendedores">Lista de Vendedores</a></li>
+                    <li><a href="/vehiculos">Lista de Vehículos</a></li>
+                    <li><a href="/">Salir</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Contenido principal -->
+        <main class="content">
+            <header>
+                <h1>Lista de Repartidores</h1>
+                <!-- Botón para agregar nuevo repartidor -->
+                <a href="{{ url_for('agregar_repartidor') }}">
+                    <button style="background-color: green; color: white; padding: 10px;">Agregar Repartidor</button>
+                </a>
+            </header>
+            <section class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Nombre</th>
+                            <th>Apellidos</th>
+                            <th>No. Licencia</th>
+                            <th>Teléfono</th>
+                            <th>Foto</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for repartidores in repartidores %}
+                            <tr>
+                                <td>{{ repartidores.id_repartidor}}</td>
+                                <td>{{ repartidores.nombre }}</td>
+                                <td>{{ repartidores.apellidos }}</td>
+                                <td>{{ repartidores.no_licencia }}</td>
+                                <td>{{ repartidores.telefono }}</td>
+                                <td><img src="{{repartidores.foto }}" alt="{{ repartidores.foto }}" style="max-width: 100px;"></td>
+                                <td>
+                                    <button class="btn-editar">Editar</button>
+                                    <button class="btn-eliminar">Eliminar</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
