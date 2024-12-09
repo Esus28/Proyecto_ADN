@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Lista de Repartidores</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <div class="container">
+       {% include 'admin/src/navbar.html' %}
+
+        <!-- Contenido principal -->
+        <main class="content">
+            <header>
+                <h1>Lista de Repartidores</h1>
+                <!-- Botón para agregar nuevo repartidor -->
+                <a href="{{ url_for('agregar_repartidor') }}">
+                    <button style="background-color: green; color: white; padding: 10px;">Agregar Repartidor</button>
+                </a>
+            </header>
+            <section class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Nombre</th>
+                            <th>Apellidos</th>
+                            <th>No. Licencia</th>
+                            <th>Teléfono</th>
+                            <th>Foto</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for repartidores in repartidores %}
+                            <tr>
+                                <td>{{ repartidores.id_repartidor}}</td>
+                                <td>{{ repartidores.nombre }}</td>
+                                <td>{{ repartidores.apellidos }}</td>
+                                <td>{{ repartidores.no_licencia }}</td>
+                                <td>{{ repartidores.telefono }}</td>
+                                <td><img src="/static/fotos_repartidores/{{repartidores.foto }}" alt="{{ repartidores.foto }}" style="max-width: 50px;"></td>
+                                <td>
+                                    <a href="{{url_for('actualizar_repartidor', id=repartidores.id_repartidor)}}" class="btn-editar">Editar</a>
+                                    <a href="{{url_for('eliminar_repartidor', id=repartidores.id_repartidor)}}" class="btn-eliminar">Eliminar</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

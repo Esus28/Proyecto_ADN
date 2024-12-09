@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Rutas</title>
+    <link rel="stylesheet" href="/static/css/rutas.css">
+</head>
+<body>
+    <div class="container">
+        {% include 'admin/src/navbar.html' %}
+
+
+        <!-- Contenido principal -->
+        <main class="content">
+            <header>
+                <h1>Lista de Rutas</h1>
+                <button class="new-repartidor">Nueva Ruta</button>
+            </header>
+            <section class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Número de ruta</th>
+                            <th>Grupo de ruta</th>
+                            <th>Tiempo estimado</th>
+                            <th>Cliente id</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rutas in rutas %}
+                            <tr>
+                                <td>{{ rutas.id_ruta}}</td>
+                                <td>{{ rutas.num_ruta }}</td>
+                                <td>{{ rutas.grupos_rutas }}</td>
+                                <td>{{ rutas.tiempo_est }}</td>
+                                <td>{{ rutas.cliente_id }}</td>
+                                <td>
+                                    <button class="btn-editar">Editar</button>
+                                    <button class="btn-eliminar">Eliminar</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

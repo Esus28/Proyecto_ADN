@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <title>Lista de Vendedores</title>
+    <link rel="stylesheet" href="/static/css/vendedores.css">
+    <link rel="stylesheet" href="/static/css/mapa.css">
+    <style>
+      
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% include 'admin/src/navbar.html' %}
+
+        <!-- Contenido principal -->
+        <main class="content">
+            <header>
+                <h1>Vista de Rutas</h1>
+            </header>
+            <div id="map"></div>
+        </main>
+        <script src="{{ url_for('static', filename='js/leaflet.js') }}"></script>
+
+    </div>
+   <script>
+    var map = L.map('map').setView([ 19.7983387, -99.8970355], 10);
+
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+
+
+  // Crear el icono personalizado para el punto de salida
+  var AND = L.icon({
+    iconUrl: 'static/images/dron.png', 
+    iconSize: [32, 32],             
+    iconAnchor: [16, 32],            
+    popupAnchor: [0, -32]         
+  });
+
+  // Crear el marcador del punto de salida
+  var marcador1 = L.marker([19.7887059, -99.8736229], { icon: AND }).addTo(map)
+    .bindPopup("<b>Agroquímicos del Norte-Sede-Atlacomulco.</b>");
+
+  // Recoger los datos de los clientes (punto de llegada)
+  const clientes = JSON.parse('{{ datos_clientes_json | tojson }}');
+  
+  // Inicializar el marcador del cliente (punto de llegada)
+  var lat = parseFloat(clientes[0].latitud);  // Usamos el primer cliente como ejemplo
+  var lon = parseFloat(clientes[0].longitud);
+  
+  var iconUrl = 'static/images/cliente.png';  
+
+  // Crear el marcador del punto de llegada
+  var marker = L.marker([lat, lon], {
+    icon: L.icon({
+      iconUrl: iconUrl,  
+      iconSize: [30, 30],  
+      iconAnchor: [15, 30], 
+      popupAnchor: [0, -30] 
+    })
+  }).addTo(map);
+
+  // Bind popup con el nombre del cliente
+  marker.bindPopup("<b>Cliente: " + clientes[0].nombre + "</b><br>Latitud: " + lat + "<br>Longitud: " + lon);
+
+  // Crear una ruta entre el punto de salida y el de llegada
+  var ruta = L.polyline([
+    [19.7887059, -99.8736229],  // Coordenadas del punto de salida
+    [lat, lon]                  // Coordenadas del punto de llegada
+  ], { color: 'blue', weight: 4, opacity: 0.7 }).addTo(map);
+
+  // Ajustar la vista del mapa para mostrar la ruta completa
+  map.fitBounds(ruta.getBounds());
+
+</script>
+
+      
+      
+      
+      
+</body>
+</html>
+
+

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Lista de Repartidores</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+</head>
+<body>
+    <div class="container">
+       {% include 'sub_admin/src/navbar.html' %}
+
+        <!-- Contenido principal -->
+        <main class="content">
+            <header>
+                <h1>Lista de Pedidos</h1>
+              
+                <a href="{{ url_for('agregar_pedido') }}">
+                    <button style="background-color: green; color: white; padding: 10px;">Agregar Pedido</button>
+                </a>
+            </header>
+            <section class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Fecha</th>
+                            <th>Hora de inicio</th>
+                            <th>Hora de fin</th>
+                            <th>Repartidor</th>
+                            <th>Vehiculo</th>
+                            <th>Ruta</th>
+                            <th>Costo</th>
+                            <th>Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pedido in pedidos %}
+                            <tr>
+                                <td>{{ pedido.id_pedido }}</td>
+                                <td>{{ pedido.fecha }}</td>
+                                <td>{{ pedido.hora_inicio }}</td>
+                                <td>{{ pedido.hora_fin }}</td>
+                                <td>{{ pedido.repartidor.nombre }} {{ pedido.repartidor.apellidos }}</td>
+                                <td>{{ pedido.vehiculo.placas }}</td>
+                                <td>{{pedido.ruta_id}}</td>
+                                <td>${{ pedido.costo.total_costo }}</td>
+                               
+                                <td>
+                                    <a  class="btn-editar">Editar</a>
+                                    <a  class="btn-eliminar">Eliminar</a>
+                                    <a href="{{ url_for('generar_pdf', id_pedido=pedido.id_pedido) }}">Formato</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

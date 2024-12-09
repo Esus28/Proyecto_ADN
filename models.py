@@ -7,6 +7,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy import Date
 from sqlalchemy import Float
+from sqlalchemy import Time
 
 #-------- MODELS USUARIOS---------#
 class Usuario(Database):
@@ -31,6 +32,8 @@ class Repartidor(Database):
     no_licencia = Column(String(15), nullable=False, unique=True)  
     telefono = Column(String(10), nullable=False, unique=True)  
     foto = Column(String(255), nullable=True)  
+
+    pedidos = relationship('Pedido', back_populates='repartidor')
 
     def __repr__(self):
         return f"<Repartidor(id_repartidor={self.id_repartidor}, nombre={self.nombre}, apellidos={self.apellidos}, no_licencia={self.no_licencia}, telefono={self.telefono})>"
@@ -57,14 +60,19 @@ class Cliente(Database):
     __tablename__ = 'clientes'
 
     id_cliente = Column(Integer, primary_key=True, autoincrement=True)
+    clave = Column(Integer)
     nombre = Column(String(100), nullable=False)
     apellidos = Column(String(100), nullable=False)
     telefono = Column(String(15), nullable=False)
     correo = Column(String(100), nullable=False, unique=True)
-    ubicacion = Column(String(255), nullable=True)
+  
     municipio = Column(String(100), nullable=False)
     codigo_postal = Column(String(10), nullable=False)
+    clasificacion = Column(String(250), nullable=False)
     vendedor_id = Column(Integer, ForeignKey('vendedores.id_vendedor'), nullable=False)
+    tipo_entrega = Column(String(50))
+    latitud = Column(Float)  # Tipo adecuado para almacenar números con decimales
+    longitud = Column(Float)  # Tipo adecuado para almacenar números con decimales
 
     vendedor = relationship('Vendedor', back_populates='clientes')
     # Relación con la tabla de Costos
@@ -87,6 +95,7 @@ class Vehiculo(Database):
     ultimo_servicio = Column(Date, nullable=False)
     prox_verifi = Column(Date, nullable=False)
     ultima_tenencia = Column(Date, nullable=False)
+    pedidos = relationship('Pedido', back_populates='vehiculo')
 
     def __repr__(self):
         return f"<Vehiculo(id_vehiculo={self.id_vehiculo}, modelo={self.modelo}, placas={self.placas}, ultimo_servicio={self.ultimo_servicio}, prox_verifi={self.prox_verifi}, ultima_tenencia={self.ultima_tenencia})>"
@@ -103,12 +112,13 @@ class Costo(Database):
     lugar_salida = Column(String(100), nullable=False)
     lugar_llegada = Column(String(100), nullable=False)
     distancia = Column(Float, nullable=False)  # en kilómetros
-    tiempo = Column(Float, nullable=False)  # en horas
+    tiempo = Column(Time, nullable=False)  # en horas
     total_costo = Column(Float, nullable=False)  # costo total
     cliente_id = Column(Integer, ForeignKey('clientes.id_cliente'), nullable=False)
 
     # Relación con la tabla Cliente
     cliente = relationship('Cliente', back_populates='costos')
+    pedidos = relationship('Pedido', back_populates='costo')
 
     def __repr__(self):
         return f"<Costo(id_costo={self.id_costo}, prec_gasolina={self.prec_gasolina}, prec_caseta={self.prec_caseta}, lugar_salida={self.lugar_salida}, lugar_llegada={self.lugar_llegada}, distancia={self.distancia}, tiempo={self.tiempo}, total_costo={self.total_costo}, cliente_id={self.cliente_id})>"
@@ -133,3 +143,23 @@ class Ruta(Database):
 
 
 
+
+class Pedido(Database):
+    __tablename__ = 'pedidos'
+
+    id_pedido = Column(Integer, primary_key=True, autoincrement=True)  # Clave primaria con auto-incremento
+    fecha = Column(Date, nullable=True)  # Tipo Date, puede ser nulo
+    hora_inicio = Column(String(20), nullable=True)  # Tipo VARCHAR(20), puede ser nulo
+    hora_fin = Column(String(20), nullable=True)  # Tipo VARCHAR(20), puede ser nulo
+    repartidor_id = Column(Integer, ForeignKey('repartidores.id_repartidor'), nullable=True)  # Clave foránea a la tabla repartidores
+    vehiculo_id = Column(Integer, ForeignKey('vehiculos.id_vehiculo'), nullable=True)  # Clave foránea a la tabla vehiculos
+    ruta_id = Column(String(20), nullable=True) 
+    costo_id = Column(Integer, ForeignKey('costos.id_costo'), nullable=True)  # Clave foránea a la tabla costos
+
+    # Relaciones con las tablas relacionadas
+    repartidor = relationship('Repartidor', back_populates='pedidos')
+    vehiculo = relationship('Vehiculo', back_populates='pedidos')
+    costo = relationship('Costo', back_populates='pedidos')
+
+    def __repr__(self):
+        return f"<Pedido(id_pedido={self.id_pedido}, fecha={self.fecha}, hora_inicio={self.hora_inicio}, hora_fin={self.hora_fin})>"

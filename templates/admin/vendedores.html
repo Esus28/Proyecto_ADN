@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Vendedores</title>
+    <link rel="stylesheet" href="/static/css/vendedores.css">
+</head>
+<body>
+    <div class="container">
+        {% include 'admin/src/navbar.html' %}
+
+
+        <!-- Contenido principal -->
+        <main class="content">
+            <header>
+                <h1>Lista de Vendedores</h1>
+                <a href="{{ url_for('agregar_vendedor') }}">
+                    <button style="background-color: green; color: white; padding: 10px;">Agregar Vendedor</button>
+                </a>
+            </header>
+            <section class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Nombre</th>
+                            <th>Apellidos</th>
+                            <th>Teléfono</th>
+                            <th>Foto</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vendedores in vendedores %}
+                            <tr>
+                                <td>{{ vendedores.id_vendedor}}</td>
+                                <td>{{ vendedores.nombre }}</td>
+                                <td>{{ vendedores.apellidos }}</td>
+                                <td>{{ vendedores.telefono }}</td>
+                                <td><img src="/static/fotos_vendedores/{{vendedores.foto }}" alt="{{ vendedores.foto }}" style="max-width: 50px;"></td>
+                                <td>
+                                    <a href="{{url_for('actualizar_vendedor', id=vendedores.id_vendedor)}}" class="btn-editar">Editar</a>
+                                    <a href="{{url_for('eliminar_vendedor', id=vendedores.id_vendedor)}}" class="btn-eliminar">Eliminar</a>
+                                </td>                                
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

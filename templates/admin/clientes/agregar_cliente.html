@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Cliente</title>
+    <link rel="stylesheet" href="/static/css/agregar_repartidor.css">
+</head>
+<body>
+    <div class="form-container">
+        <h2>REGISTRO DE UN NUEVO CLIENTE</h2>
+        <form action="{{url_for('agregar_cliente')}}" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="nombre">CLAVE</label>
+                <input type="text" id="clave" name="clave" required>
+            </div>
+            <div class="form-group">
+                <label for="apellidos">NOMBRE</label>
+                <input type="text" id="nombre" name="nombre" required>
+            </div>
+
+            <div class="form-group">
+                <label for="apellidos">APELLIDOS</label>
+                <input type="text" id="apellidos" name="apellidos" required>
+            </div>
+
+            <div class="form-group">
+                <label for="apellidos">TELÉFONO</label>
+                <input type="text" id="telefono" name="telefono" required>
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">CORREO</label>
+                <input type="email" id="correo" name="correo" required>
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">MUNICIPIO</label>
+                <input type="text" id="municipio" name="municipio" required>
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">CÓDIGO POSTAL</label>
+                <input type="number" id="codigo_postal" name="codigo_postal" required>
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">CLASIFICACIÓN</label>
+                <input type="number" id="clasificacion" name="clasificacion" required>
+            </div>
+
+            <div class="form-group">
+                <label for="vendedor_id">VENDEDOR</label>
+                <select id="vendedor_id" name="vendedor_id" required>
+                    <option value="">Seleccione un vendedor</option>  <!-- Opción por defecto -->
+                    {% for vendedor in vendedores %}
+                        <option value="{{ vendedor.id }}">{{ vendedor.nombre }} {{ vendedor.apellidos }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="telefono">TIPO DE ENTREGA</label>
+                <input type="text" id="tipo_entrega" name="tipo_entrega" required>
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">LATITUD</label>
+                <input type="number" id="latitud" name="latitud" required>
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">LOGIUD</label>
+                <input type="number" id="longitud" name="longitud" required>
+            </div>
+
+            
+
+            
+            <div class="form-actions">
+                <a href="{{url_for('clientes')}}">
+                    <button type="button" class="cancelar-btn">CANCELAR</button>
+                </a>
+                <button type="submit" class="agregar-btn">AGREGAR</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

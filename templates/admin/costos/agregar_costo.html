@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Costo</title>
+    <link rel="stylesheet" href="/static/css/agregar_repartidor.css">
+</head>
+<body>
+    <div class="form-container">
+        <h2>REGISTRO DE UN NUEVO COSTO</h2>
+        <form action="{{url_for('agregar_repartidor')}}" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="nombre">PRECIO DE GASOLINA</label>
+                <input type="text" id="prec_gasolina" name="prec_gasolina" required>
+            </div>
+            <div class="form-group">
+                <label for="apellidos">PRECIO DE CASETA</label>
+                <input type="text" id="prec_caseta" name="prec_caseta" required>
+            </div>
+
+            <div class="form-group">
+                <label for="apellidos">LUGAR DE SALIDA</label>
+                <input type="text" id="lugar_salida" name="lugar_salida" required>
+            </div>
+
+            <div class="form-group">
+                <label for="apellidos">LUGAR DE LLEGADA</label>
+                <input type="text" id="lugar_llegada" name="lugar_llegada" required>
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">DISTANCIA (KM)</label>
+                <input type="text" id="distancia" name="distancia" required>
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">TIEMPO DE LLEGADA</label>
+                <input type="time" id="tiempo" name="tiempo" required>
+            </div>
+
+            
+            <div class="form-group">
+                <label for="telefono">TOTAL DE COSTO</label>
+                <input type="text" id="total_costo" name="total_costo" required>
+            </div>
+
+            <div class="form-group">
+                <label for="cliente_id">CLIENTE</label>
+                <select id="cliente_id" name="cliente_id" required>
+                    <option value="">Seleccione un cliente</option>  <!-- Opción por defecto -->
+                    {% for cliente in clientes %}
+                        <option value="{{ cliente.id }}">{{ cliente.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+
+            
+            <div class="form-actions">
+                <a href="{{url_for('costos')}}">
+                    <button type="button" class="cancelar-btn">CANCELAR</button>
+                </a>
+                <button type="submit" class="agregar-btn">AGREGAR</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
