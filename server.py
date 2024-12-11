@@ -389,7 +389,7 @@ def agregar_cliente():
 
     
    
-    nuevo_cliente = models.Vehiculo(
+    nuevo_cliente = models.Cliente(
        clave = clave,
        nombre = nombre,
        apellidos = apellidos,

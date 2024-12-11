@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/static/css/agregar_repartidor.css">
 </head>
 <body>
-    <div class="form-container">
+    <div class="form-container" style="margin-top: 25em;">
         <h2>REGISTRO DE UN NUEVO CLIENTE</h2>
         <form action="{{url_for('agregar_cliente')}}" method="POST" enctype="multipart/form-data">
             <div class="form-group">
@@ -46,7 +46,7 @@
 
             <div class="form-group">
                 <label for="telefono">CLASIFICACIÓN</label>
-                <input type="number" id="clasificacion" name="clasificacion" required>
+                <input type="text" id="clasificacion" name="clasificacion" required>
             </div>
 
             <div class="form-group">
@@ -54,7 +54,7 @@
                 <select id="vendedor_id" name="vendedor_id" required>
                     <option value="">Seleccione un vendedor</option>  <!-- Opción por defecto -->
                     {% for vendedor in vendedores %}
-                        <option value="{{ vendedor.id }}">{{ vendedor.nombre }} {{ vendedor.apellidos }}</option>
+                        <option value="{{ vendedor.id_vendedor }}">{{ vendedor.nombre }} {{ vendedor.apellidos }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -66,12 +66,12 @@
 
             <div class="form-group">
                 <label for="telefono">LATITUD</label>
-                <input type="number" id="latitud" name="latitud" required>
+                <input type="number" id="latitud" name="latitud" step="any"  required>
             </div>
 
             <div class="form-group">
                 <label for="telefono">LOGIUD</label>
-                <input type="number" id="longitud" name="longitud" required>
+                <input type="number" id="longitud" name="longitud" step="any" required>
             </div>
 
             

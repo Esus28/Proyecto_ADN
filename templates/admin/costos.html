@@ -30,7 +30,7 @@
                             <th>Distancia</th>
                             <th>Tiempo</th>
                             <th>Total costo</th>
-                            <th>Cliente_id</th>
+                            <th>Cliente</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -45,7 +45,7 @@
                                 <td>{{ costos.distancia }}</td>
                                 <td>{{ costos.tiempo }}</td>
                                 <td>{{ costos.total_costo }}</td>
-                                <td>{{ costos.cliente_id}}</td>
+                                <td>{{ costos.cliente.nombre}} {{ costos.cliente.apellidos}}</td>
                                 <td>
                                     <a href="{{url_for('actualizar_costo', id=costos.id_costo)}}" class="btn-editar">Editar</a>
                                     <a href="{{url_for('eliminar_vehiculo', id=costos.id_costo)}}" class="btn-eliminar">Eliminar</a>
