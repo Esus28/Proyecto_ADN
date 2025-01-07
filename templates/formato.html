@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Recibo de Pedido</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .logo {
+            text-align: center;
+        }
+        .logo img {
+            width: 100px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        .firma {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .firma div {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+  
+    <h2 style="text-align: center;">RECIBO DE PEDIDO - AGROQUÍMICOS DEL NORTE</h2>
+    <p>Fecha de pedido: {{ fecha_pedido }}</p>
+    <table>
+        <tr>
+            <th>No. Pedido</th>
+            <td>{{ no_pedido }}</td>
+        </tr>
+        <tr>
+            <th>Repartidor</th>
+            <td>{{ repartidor }}</td>
+        </tr>
+        <tr>
+            <th>Vehículo</th>
+            <td>{{ vehiculo }}</td>
+        </tr>
+        <tr>
+            <th>Ruta</th>
+            <td>{{ ruta }}</td>
+        </tr>
+        <tr>
+            <th>Hora de Inicio</th>
+            <td>{{ hora_inicio }}</td>
+        </tr>
+        <tr>
+            <th>Hora de Fin</th>
+            <td>{{ hora_fin }}</td>
+        </tr>
+        <tr>
+            <th>Costo Total</th>
+            <td>${{ costo_total }}</td>
+        </tr>
+    </table>
+    <div class="firma">
+        <div>
+            ______________________________<br>
+            Firma Repartidor
+        </div>
+        <div>
+            ______________________________<br>
+            Firma del Cliente
+        </div>
+    </div>
+</body>
+</html>

@@ -7,11 +7,11 @@ from database import db_session
 from werkzeug.utils import secure_filename
 from flask import flash, session
 from datetime import datetime
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from io import BytesIO
-from flask import send_file
 
+
+from weasyprint import HTML
+
+from flask import make_response
 from database import Database
 from database import engine
 
@@ -690,6 +690,37 @@ def rutas():
     return render_template('/admin/rutas.html', rutas=rutas)
 
 
+@app.route('/registrar_rutas/', methods=['GET', 'POST'])
+def registrar_ruta():
+    if request.method == 'GET':
+        return render_template('admin/rutas/registrar_rutas.html')
+
+    
+    num_ruta = request.form.get('num_ruta')
+    grupo_rutas = request.form.get('grupo_rutas')
+    ultimo_servicio = request.form.get('ultimo_servicio')
+    prox_verifi = request.form.get('prox_verifi')
+    ultima_tenencia = request.form.get('ultima_tenencia')
+
+    
+   
+    nuevo_vehiculo = models.Vehiculo(
+        num_ruta = num_ruta,
+        grupo_rutas = grupo_rutas,
+        ultimo_servicio = ultimo_servicio,
+        prox_verifi = prox_verifi,
+        ultima_tenencia = ultima_tenencia
+    )
+
+    db_session.add(nuevo_vehiculo)
+    db_session.commit()
+
+    flash('Vehículo agregado exitosamente.', 'success')
+    return redirect(url_for('vehiculos'))
+
+
+
+
 
 #----------------------------------------------FUNCIONES SUB ADMIN------------------------------------
 @app.route('/sesion_subadmin')
@@ -732,37 +763,32 @@ def agregar_pedido():
     flash('Pedido agregado exitosamente.', 'success')
     return redirect(url_for('sub_sesion'))
 
-
 @app.route('/generar_pdf/<int:id_pedido>')
 def generar_pdf(id_pedido):
-    # Obtener el pedido de la base de datos
-    pedido = db_session.query(models.Pedido).filter(models.Pedido.id_pedido == id_pedido).first()
 
-    if pedido:
-        # Crear un objeto PDF en memoria
-        buffer = BytesIO()
-        c = canvas.Canvas(buffer, pagesize=letter)
+    pedido = db_session.query(models.Pedido).get(id_pedido)
 
-        # Configuración de los datos a mostrar
-        c.drawString(100, 750, f"ID Pedido: {pedido.id_pedido}")
-        c.drawString(100, 730, f"Fecha: {pedido.fecha}")
-        c.drawString(100, 710, f"Hora de inicio: {pedido.hora_inicio}")
-        c.drawString(100, 690, f"Hora de fin: {pedido.hora_fin}")
-        c.drawString(100, 670, f"Repartidor: {pedido.repartidor.nombre} {pedido.repartidor.apellidos}")
-        c.drawString(100, 650, f"Vehículo: {pedido.vehiculo.placas}")
-        c.drawString(100, 630, f"Costo total: {pedido.costo.total_costo}")
+    html = render_template(
+        'formato.html',
+        no_pedido=pedido.id_pedido,
+        fecha_pedido=pedido.fecha,
+        hora_inicio=pedido.hora_inicio,
+        hora_fin=pedido.hora_fin,
+        repartidor=f"{pedido.repartidor.nombre} {pedido.repartidor.apellidos}",
+        vehiculo=pedido.vehiculo.placas,
+        ruta=pedido.ruta_id,
+        costo_total=pedido.costo.total_costo,
+    )
 
-        # Finalizar y guardar el PDF en el buffer
-        c.showPage()
-        c.save()
 
-        # Mover el puntero del buffer al inicio
-        buffer.seek(0)
+    pdf = HTML(string=html).write_pdf()
 
-        # Retornar el archivo PDF como una respuesta
-        return send_file(buffer, as_attachment=True, download_name=f"pedido_{id_pedido}.pdf", mimetype='application/pdf')
-    else:
-        return "Pedido no encontrado", 404
-   
+
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=recibo_pedido_{id_pedido}.pdf'
+
+    return response
+
 if __name__ == '__main__':
     app.run('0.0.0.0', 8081, debug=True)
