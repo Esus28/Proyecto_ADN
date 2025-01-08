@@ -75,11 +75,9 @@ class Cliente(Database):
     longitud = Column(Float)  # Tipo adecuado para almacenar números con decimales
 
     vendedor = relationship('Vendedor', back_populates='clientes')
-    # Relación con la tabla de Costos
     costos = relationship('Costo', back_populates='cliente')
-
-    # Relación con la tabla de Rutas
     rutas = relationship('Ruta', back_populates='cliente')
+    pedidos = relationship('Pedido', back_populates='cliente')
 
     def __repr__(self):
         return f"<Cliente(id_cliente={self.id_cliente}, nombre={self.nombre}, apellidos={self.apellidos}, telefono={self.telefono}correo={self.correo}, ubicacion={self.ubicacion}, municipio={self.municipio}, codigo_postal={self.codigo_postal}, vendedor_id={self.vendedor_id})>"
@@ -154,12 +152,14 @@ class Pedido(Database):
     repartidor_id = Column(Integer, ForeignKey('repartidores.id_repartidor'), nullable=True)  # Clave foránea a la tabla repartidores
     vehiculo_id = Column(Integer, ForeignKey('vehiculos.id_vehiculo'), nullable=True)  # Clave foránea a la tabla vehiculos
     ruta_id = Column(String(20), nullable=True) 
-    costo_id = Column(Integer, ForeignKey('costos.id_costo'), nullable=True)  # Clave foránea a la tabla costos
+    costo_id = Column(Integer, ForeignKey('costos.id_costo'), nullable=True)  
+    cliente_id = Column(Integer, ForeignKey('clientes.id_cliente'), nullable=True)
 
-    # Relaciones con las tablas relacionadas
+
     repartidor = relationship('Repartidor', back_populates='pedidos')
     vehiculo = relationship('Vehiculo', back_populates='pedidos')
     costo = relationship('Costo', back_populates='pedidos')
+    cliente = relationship('Cliente', back_populates='pedidos')
 
     def __repr__(self):
         return f"<Pedido(id_pedido={self.id_pedido}, fecha={self.fecha}, hora_inicio={self.hora_inicio}, hora_fin={self.hora_fin})>"

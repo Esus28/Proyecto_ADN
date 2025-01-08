@@ -21,7 +21,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Id</th>
+                            <th>Clave</th>
                             <th>Nombre</th>
                             <th>Apellidos</th>
                             <th>telefono</th>
@@ -37,7 +37,7 @@
                     <tbody>
                         {% for cliente in clientes %}
                             <tr>
-                                <td>{{ cliente.id_cliente }}</td>
+                                <td>{{ cliente.clave }}</td>
                                 <td>{{ cliente.nombre }}</td>
                                 <td>{{ cliente.apellidos }}</td>
                                 <td>{{ cliente.telefono }}</td>
@@ -46,10 +46,10 @@
                                 <td>{{ cliente.longitud }}</td>
                                 <td>{{ cliente.municipio }}</td>
                                 <td>{{ cliente.codigo_postal }}</td>
-                                <td>{{ cliente.vendedor_id }}</td>
+                                <td>{{ cliente.vendedor.nombre }}</td>
                                 <td>
-                                    <a href="{{url_for('actualizar_cliente', id=cliente.id_cliente)}}" class="btn-editar">Editar</a>
-                                    <a href="{{url_for('eliminar_vehiculo', id=cliente.id_cliente)}}" class="btn-eliminar">Eliminar</a>
+                                    <a href="{{url_for('actualizar_cliente', id=cliente.id_cliente)}}" class="btn-editar">Editar</a> <br><br><br>
+                                    <a href="{{url_for('eliminar_cliente', id=cliente.id_cliente)}}" class="btn-eliminar">Eliminar</a>
                                 </td>                                
                             </tr>
                         {% endfor %}

@@ -51,7 +51,7 @@
             <div class="form-group">
                 <label for="vehiculo_id">VEHICULO</label>
                 <select id="vehiculo_id" name="vehiculo_id" required>
-                    <option value="">Seleccione un vehiculo</option>  <!-- Opción por defecto -->
+                    <option value="">{{pedido.vehiculo.nombre}}</option>
                     {% for vehiculo in vehiculos %}
                         <option value="{{ vehiculo.id_vehiculo }}">{{ vehiculo.placas }}</option>
                     {% endfor %}

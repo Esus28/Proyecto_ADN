@@ -11,7 +11,7 @@
     <div class="container">
        {% include 'sub_admin/src/navbar.html' %}
 
-        <!-- Contenido principal -->
+       
         <main class="content">
             <header>
                 <h1>Lista de Pedidos</h1>
@@ -49,7 +49,7 @@
                                
                                 <td>
                                     <a  class="btn-editar">Editar</a>
-                                    <a  class="btn-eliminar">Eliminar</a>
+                                    <a href="{{ url_for('eliminar_pedido', id=pedido.id_pedido) }}" class="btn-eliminar">Eliminar</a>
                                     <a href="{{ url_for('generar_pdf', id_pedido=pedido.id_pedido) }}">Formato</a>
                                 </td>
                             </tr>

@@ -53,7 +53,7 @@
                 <select id="vendedor_id" name="vendedor_id">
                     <option value="">{{ cliente.vendedor.nombre }} {{ cliente.vendedor.apellidos }}</option>  
                     {% for vendedor in vendedores %}
-                        <option value="{{ vendedor.id }}" {% if cliente.vendedor_id == vendedor.id %} selected {% endif %}>{{ vendedor.nombre }} {{ vendedor.apellidos }}</option>
+                        <option value="{{ vendedor.id_vendedor }}" {% if cliente.vendedor_id == vendedor.id_vendedor %} selected {% endif %}>{{ vendedor.nombre }} {{ vendedor.apellidos }}</option>
                     {% endfor %}
                 </select>
             </div>

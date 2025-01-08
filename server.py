@@ -483,7 +483,7 @@ def eliminar_cliente(id):
     db_session.commit()
 
     flash("Vendedor eliminado exitosamente.", "success")
-    return redirect(url_for('vehiculos'))
+    return redirect(url_for('clientes'))
 
 
 
@@ -732,10 +732,11 @@ def sub_sesion():
 @app.route('/agregar_pedido', methods=['GET', 'POST'])
 def agregar_pedido():
     repartidores = db_session.query(models.Repartidor)
+    clientes = db_session.query(models.Cliente)
     vehiculos = db_session.query(models.Vehiculo)
     costos = db_session.query(models.Costo)
     if request.method == 'GET':
-        return render_template('sub_admin/pedidos/registrar_pedido.html', repartidores=repartidores, vehiculos=vehiculos, costos=costos)
+        return render_template('sub_admin/pedidos/registrar_pedido.html', repartidores=repartidores, vehiculos=vehiculos, costos=costos, clientes=clientes)
 
     
     fecha = request.form.get('fecha')
@@ -743,6 +744,7 @@ def agregar_pedido():
     hora_fin = request.form.get('hora_fin')
     repartidor_id = request.form.get('repartidor_id')
     vehiculo_id = request.form.get('vehiculo_id')
+    cliente_id = request.form.get('cliente_id')
     ruta_id = request.form.get('ruta_id')
     costo_id = request.form.get('costo_id')
 
@@ -754,7 +756,8 @@ def agregar_pedido():
        repartidor_id = repartidor_id,
        vehiculo_id = vehiculo_id,
        ruta_id = ruta_id,
-       costo_id = costo_id 
+       costo_id = costo_id,
+       cliente_id = cliente_id 
     )
 
     db_session.add(nuevo_repartidor)
@@ -762,6 +765,74 @@ def agregar_pedido():
 
     flash('Pedido agregado exitosamente.', 'success')
     return redirect(url_for('sub_sesion'))
+
+@app.route('/actualizar_pedido/<id>', methods=['GET', 'POST'])
+def actualizar_cliente(id):
+    pedido = db_session.query(models.Cliente).get(id) 
+
+    if not pedido:
+        flash("El pedido no existe.", "error")
+        return redirect(url_for('clientes'))
+
+    if request.method == 'GET':
+        repartidores = db_session.query(models.Repartidor)
+        clientes = db_session.query(models.Cliente)
+        vehiculos = db_session.query(models.Vehiculo)
+        costos = db_session.query(models.Costo)
+        vendedores = db_session.query(models.Vendedor)
+        return render_template('admin/clientes/actualizar_cliente.html', pedido=pedido, vendedores=vendedores, repartidores=repartidores,
+                               clientes=clientes, vehiculos=vehiculos, costos=costos)
+
+     
+    hora_inicio = request.form.get('hora_inicio')
+    hora_fin = request.form.get('hora_fin')
+    repartidor_id = request.form.get('repartidor_id')
+    vehiculo_id = request.form.get('vehiculo_id')
+    cliente_id = request.form.get('cliente_id')
+    ruta_id = request.form.get('ruta_id')
+    costo_id = request.form.get('costo_id')
+
+
+
+    
+    if hora_inicio and hora_inicio.strip():
+        pedido.hora_inicio = hora_inicio
+    if hora_fin and hora_fin.strip():
+        pedido.hora_fin = hora_fin
+    if repartidor_id and repartidor_id.strip():
+        pedido.repartidor_id = repartidor_id
+    if vehiculo_id and vehiculo_id.strip():
+        pedido.vehiculo_id = vehiculo_id
+    if cliente_id and cliente_id.strip():
+        pedido.cliente_id = cliente_id
+    if ruta_id and ruta_id.strip():
+        pedido.ruta_id = ruta_id
+    if costo_id and costo_id.strip():
+        pedido.costo_id = costo_id
+
+    db_session.add(pedido)
+    db_session.commit()
+
+    flash('Pedido editado exitosamente.', 'success')
+    return redirect(url_for('sub_sesion'))
+
+
+@app.get('/eliminar_pedido/<id>')
+def eliminar_pedido(id):
+  
+    pedido = db_session.query(models.Pedido).get(id)
+    
+    if not pedido:
+        flash("El pedido no existe.", "error")
+        return redirect(url_for('sub_sesion'))
+    
+    db_session.delete(pedido)
+    db_session.commit()
+
+    flash("Pedido eliminado exitosamente.", "success")
+    return redirect(url_for('sub_sesion'))
+
+
 
 @app.route('/generar_pdf/<int:id_pedido>')
 def generar_pdf(id_pedido):
@@ -789,6 +860,31 @@ def generar_pdf(id_pedido):
     response.headers['Content-Disposition'] = f'attachment; filename=recibo_pedido_{id_pedido}.pdf'
 
     return response
+
+
+@app.get('/sub_vista_rutas')
+def sub_vista_ruta():
+    clientes = db_session.query(models.Cliente).all()
+
+   
+    datos_clientes = [
+        {
+            'clave': cliente.clave,
+            'nombre': cliente.nombre,
+            'apellidos': cliente.apellidos,
+            'vendedor': cliente.vendedor.nombre,
+            'vape': cliente.vendedor.apellidos,
+            'latitud': float(cliente.latitud), 
+            'longitud': float(cliente.longitud),  
+           
+        }
+        for cliente in clientes
+    ]
+
+  
+    return render_template('/sub_admin/mapa.html', datos_clientes_json=datos_clientes)
+
+
 
 if __name__ == '__main__':
     app.run('0.0.0.0', 8081, debug=True)
