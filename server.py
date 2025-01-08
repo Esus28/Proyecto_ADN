@@ -342,15 +342,19 @@ def eliminar_vendedor(id):
 
 @app.get('/vista_rutas')
 def vista_ruta():
-    # Obtener los clientes desde la base de datos
     clientes = db_session.query(models.Cliente).all()
 
-    # Recopilar los datos de latitud, longitud y nombre de cada cliente, asegurándose de convertir latitud y longitud a float
+   
     datos_clientes = [
         {
-            'latitud': float(cliente.latitud),  # Asegurarse de convertir a float
-            'longitud': float(cliente.longitud),  # Asegurarse de convertir a float
+            'clave': cliente.clave,
             'nombre': cliente.nombre,
+            'apellidos': cliente.apellidos,
+            'vendedor': cliente.vendedor.nombre,
+            'vape': cliente.vendedor.apellidos,
+            'latitud': float(cliente.latitud), 
+            'longitud': float(cliente.longitud),  
+           
         }
         for cliente in clientes
     ]
@@ -767,7 +771,7 @@ def agregar_pedido():
     return redirect(url_for('sub_sesion'))
 
 @app.route('/actualizar_pedido/<id>', methods=['GET', 'POST'])
-def actualizar_cliente(id):
+def actualizar_pedido(id):
     pedido = db_session.query(models.Cliente).get(id) 
 
     if not pedido:
