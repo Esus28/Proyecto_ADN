@@ -508,6 +508,7 @@ def agregar_vehiculo():
     ultimo_servicio = request.form.get('ultimo_servicio')
     prox_verifi = request.form.get('prox_verifi')
     ultima_tenencia = request.form.get('ultima_tenencia')
+    cpk = request.form.get('cpk')
 
     
    
@@ -516,7 +517,8 @@ def agregar_vehiculo():
         placas = placas,
         ultimo_servicio = ultimo_servicio,
         prox_verifi = prox_verifi,
-        ultima_tenencia = ultima_tenencia
+        ultima_tenencia = ultima_tenencia,
+        cpk = cpk
     )
 
     db_session.add(nuevo_vehiculo)
@@ -543,6 +545,7 @@ def actualizar_vehiculo(id):
     ultimo_servicio = request.form.get('ultimo_servicio')
     prox_verfi = request.form.get('prox_verifi')
     ultima_tenencia = request.form.get('ultima_tenencia')
+    cpk = request.form.get('cpk')
 
 
     
@@ -556,6 +559,9 @@ def actualizar_vehiculo(id):
         vehiculo.prox_verfi = prox_verfi
     if ultima_tenencia and ultima_tenencia.strip():
         vehiculo.ultima_tenencia = ultima_tenencia
+    if cpk and cpk.strip():
+        vehiculo.cpk = cpk
+
   
 
     db_session.add(vehiculo)

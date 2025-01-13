@@ -33,6 +33,11 @@
                 <label for="telefono">UTLIMA TENENCIA</label>
                 <input type="date" id="ultima_tenencia" name="ultima_tenencia" required>
             </div>
+
+            <div class="form-group">
+                <label for="telefono">CANTIDAD DE COMBUSTIBLE POR KM</label>
+                <input type="number" step="0.001" id="cpk" name="cpk" required>
+            </div>
           
             <div class="form-actions">
                 <a href="{{url_for('vehiculos')}}">

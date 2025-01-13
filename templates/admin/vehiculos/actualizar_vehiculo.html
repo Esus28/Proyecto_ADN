@@ -33,9 +33,14 @@
                 <label for="ultima_tenencia">UTLIMA TENENCIA</label>
                 <input type="date" id="ultima_tenencia" name="ultima_tenencia" value="{{vehiculo.ultima_tenencia}}" >
             </div>
+
+            <div class="form-group">
+                <label for="telefono">CANTIDAD DE COMBUSTIBLE POR KM</label>
+                <input type="number" step="0.001" id="cpk" value="{{vehiculo.cpk}}" name="cpk" required>
+            </div>
           
             <div class="form-actions">
-                <a href="{{url_for('dashboard')}}">
+                <a href="{{url_for('vehiculos')}}">
                     <button type="button" class="cancelar-btn">CANCELAR</button>
                 </a>
                 <button type="submit" class="agregar-btn">AGREGAR</button>
