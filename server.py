@@ -351,6 +351,7 @@ def vista_ruta():
             'nombre': cliente.nombre,
             'apellidos': cliente.apellidos,
             'vendedor': cliente.vendedor.nombre,
+            'municipio': cliente.municipio,
             'vape': cliente.vendedor.apellidos,
             'latitud': float(cliente.latitud), 
             'longitud': float(cliente.longitud),  
@@ -739,10 +740,17 @@ def agregar_pedido():
     clientes = db_session.query(models.Cliente)
     vehiculos = db_session.query(models.Vehiculo)
     costos = db_session.query(models.Costo)
-    if request.method == 'GET':
-        return render_template('sub_admin/pedidos/registrar_pedido.html', repartidores=repartidores, vehiculos=vehiculos, costos=costos, clientes=clientes)
-
     
+    if request.method == 'GET':
+        return render_template(
+            'sub_admin/pedidos/registrar_pedido.html', 
+            repartidores=repartidores, 
+            vehiculos=vehiculos, 
+            costos=costos, 
+            clientes=clientes
+        )
+
+    # Obtener datos del formulario
     fecha = request.form.get('fecha')
     hora_inicio = request.form.get('hora_inicio')
     hora_fin = request.form.get('hora_fin')
@@ -750,75 +758,118 @@ def agregar_pedido():
     vehiculo_id = request.form.get('vehiculo_id')
     cliente_id = request.form.get('cliente_id')
     ruta_id = request.form.get('ruta_id')
-    costo_id = request.form.get('costo_id')
+    combustible = request.form.get('combustible')
+    distancia = 140.89
+    tiempo_recorrido = 2.30
 
-   
-    nuevo_repartidor = models.Pedido(
-       fecha = fecha,
-       hora_inicio = hora_inicio,
-       hora_fin = hora_fin,
-       repartidor_id = repartidor_id,
-       vehiculo_id = vehiculo_id,
-       ruta_id = ruta_id,
-       costo_id = costo_id,
-       cliente_id = cliente_id 
+    # Obtener el vehículo para calcular el consumo de combustible
+    vehiculo = db_session.query(models.Vehiculo).filter_by(id_vehiculo=vehiculo_id).first()
+    if not vehiculo:
+        return "Error: Vehículo no encontrado", 400
+
+    # Calcular el consumo total en litros
+    litros_consumidos = distancia * vehiculo.cpk
+
+    # Calcular el costo basado en el tipo de combustible
+    precio_por_litro = 25 if combustible == "gasolina" else 30
+    costo_combustible = litros_consumidos * precio_por_litro
+
+    # Agregar un costo adicional por tiempo de recorrido (ejemplo: 10 por hora)
+    costo_total = costo_combustible + (tiempo_recorrido * 10)
+
+    # Crear el nuevo pedido
+    nuevo_pedido = models.Pedido(
+        fecha=fecha,
+        hora_inicio=hora_inicio,
+        hora_fin=hora_fin,
+        repartidor_id=repartidor_id,
+        vehiculo_id=vehiculo_id,
+        cliente_id=cliente_id,
+        ruta_id=ruta_id,
+        combustible=combustible,
+        costo=costo_total
     )
 
-    db_session.add(nuevo_repartidor)
+    # Guardar en la base de datos
+    db_session.add(nuevo_pedido)
     db_session.commit()
 
-    flash('Pedido agregado exitosamente.', 'success')
-    return redirect(url_for('sub_sesion'))
+    return redirect('sub_sesion')  # Redirigir a la lista de pedidos
+
 
 @app.route('/actualizar_pedido/<id>', methods=['GET', 'POST'])
 def actualizar_pedido(id):
-    pedido = db_session.query(models.Cliente).get(id) 
+    pedido = db_session.query(models.Pedido).get(id)  # Obtener el pedido usando el ID
 
     if not pedido:
         flash("El pedido no existe.", "error")
         return redirect(url_for('clientes'))
 
     if request.method == 'GET':
+        # Obtener datos para mostrar en el formulario de actualización
         repartidores = db_session.query(models.Repartidor)
         clientes = db_session.query(models.Cliente)
         vehiculos = db_session.query(models.Vehiculo)
         costos = db_session.query(models.Costo)
-        vendedores = db_session.query(models.Vendedor)
-        return render_template('admin/clientes/actualizar_cliente.html', pedido=pedido, vendedores=vendedores, repartidores=repartidores,
-                               clientes=clientes, vehiculos=vehiculos, costos=costos)
+        return render_template('sub_admin/pedidos/actualizar_pedido.html', 
+                               pedido=pedido, 
+                               repartidores=repartidores, 
+                               clientes=clientes, 
+                               vehiculos=vehiculos, 
+                               costos=costos)
 
-     
+    # Obtener los datos del formulario
+    fecha = request.form.get('fecha')
     hora_inicio = request.form.get('hora_inicio')
     hora_fin = request.form.get('hora_fin')
     repartidor_id = request.form.get('repartidor_id')
     vehiculo_id = request.form.get('vehiculo_id')
     cliente_id = request.form.get('cliente_id')
     ruta_id = request.form.get('ruta_id')
-    costo_id = request.form.get('costo_id')
+    combustible = request.form.get('combustible')
+    distancia = 140.89  # Ejemplo de distancia
+    tiempo_recorrido = 2.30  # Ejemplo de tiempo
 
+    # Obtener el vehículo para calcular el consumo de combustible
+    vehiculo = db_session.query(models.Vehiculo).filter_by(id_vehiculo=vehiculo_id).first()
+    if not vehiculo:
+        return "Error: Vehículo no encontrado", 400
 
+    # Calcular el consumo total en litros
+    litros_consumidos = distancia * vehiculo.cpk
 
-    
-    if hora_inicio and hora_inicio.strip():
+    # Calcular el costo basado en el tipo de combustible
+    precio_por_litro = 25 if combustible == "gasolina" else 30
+    costo_combustible = litros_consumidos * precio_por_litro
+
+    # Agregar un costo adicional por tiempo de recorrido (ejemplo: 10 por hora)
+    costo_total = costo_combustible + (tiempo_recorrido * 10)
+
+    # Actualizar los valores del pedido
+    if fecha:
+        pedido.fecha = fecha
+    if hora_inicio:
         pedido.hora_inicio = hora_inicio
-    if hora_fin and hora_fin.strip():
+    if hora_fin:
         pedido.hora_fin = hora_fin
-    if repartidor_id and repartidor_id.strip():
+    if repartidor_id:
         pedido.repartidor_id = repartidor_id
-    if vehiculo_id and vehiculo_id.strip():
+    if vehiculo_id:
         pedido.vehiculo_id = vehiculo_id
-    if cliente_id and cliente_id.strip():
+    if cliente_id:
         pedido.cliente_id = cliente_id
-    if ruta_id and ruta_id.strip():
+    if ruta_id:
         pedido.ruta_id = ruta_id
-    if costo_id and costo_id.strip():
-        pedido.costo_id = costo_id
+    if combustible:
+        pedido.combustible = combustible
+    pedido.costo = costo_total  # Actualizar el costo total calculado
 
+    # Guardar los cambios en la base de datos
     db_session.add(pedido)
     db_session.commit()
 
-    flash('Pedido editado exitosamente.', 'success')
-    return redirect(url_for('sub_sesion'))
+    flash('Pedido actualizado exitosamente.', 'success')
+    return redirect(url_for('sub_sesion'))  # Redirigir a la lista de pedidos
 
 
 @app.get('/eliminar_pedido/<id>')
@@ -852,7 +903,7 @@ def generar_pdf(id_pedido):
         repartidor=f"{pedido.repartidor.nombre} {pedido.repartidor.apellidos}",
         vehiculo=pedido.vehiculo.placas,
         ruta=pedido.ruta_id,
-        costo_total=pedido.costo.total_costo,
+        costo=pedido.costo
     )
 
 
@@ -878,6 +929,7 @@ def sub_vista_ruta():
             'apellidos': cliente.apellidos,
             'vendedor': cliente.vendedor.nombre,
             'vape': cliente.vendedor.apellidos,
+            'municipio': cliente.municipio,
             'latitud': float(cliente.latitud), 
             'longitud': float(cliente.longitud),  
            

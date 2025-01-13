@@ -94,6 +94,7 @@ class Vehiculo(Database):
     prox_verifi = Column(Date, nullable=False)
     ultima_tenencia = Column(Date, nullable=False)
     pedidos = relationship('Pedido', back_populates='vehiculo')
+    cpk = Column(Float, nullable=False)
 
     def __repr__(self):
         return f"<Vehiculo(id_vehiculo={self.id_vehiculo}, modelo={self.modelo}, placas={self.placas}, ultimo_servicio={self.ultimo_servicio}, prox_verifi={self.prox_verifi}, ultima_tenencia={self.ultima_tenencia})>"
@@ -116,8 +117,7 @@ class Costo(Database):
 
     # Relación con la tabla Cliente
     cliente = relationship('Cliente', back_populates='costos')
-    pedidos = relationship('Pedido', back_populates='costo')
-
+ 
     def __repr__(self):
         return f"<Costo(id_costo={self.id_costo}, prec_gasolina={self.prec_gasolina}, prec_caseta={self.prec_caseta}, lugar_salida={self.lugar_salida}, lugar_llegada={self.lugar_llegada}, distancia={self.distancia}, tiempo={self.tiempo}, total_costo={self.total_costo}, cliente_id={self.cliente_id})>"
 
@@ -127,12 +127,12 @@ class Ruta(Database):
     __tablename__ = 'rutas'
 
     id_ruta = Column(Integer, primary_key=True, autoincrement=True)
-    num_ruta = Column(Integer, nullable=False)  # Número de la ruta
-    grupos_rutas = Column(String(100), nullable=False)  # Descripción o grupo de la ruta
-    tiempo_est = Column(Float, nullable=False)  # Tiempo estimado en horas
+    num_ruta = Column(Integer, nullable=False) 
+    grupos_rutas = Column(String(100), nullable=False) 
+    tiempo_est = Column(Float, nullable=False)  
     cliente_id = Column(Integer, ForeignKey('clientes.id_cliente'), nullable=False)
 
-    # Relación con la tabla Cliente
+   
     cliente = relationship('Cliente', back_populates='rutas')
 
     def __repr__(self):
@@ -152,13 +152,11 @@ class Pedido(Database):
     repartidor_id = Column(Integer, ForeignKey('repartidores.id_repartidor'), nullable=True)  # Clave foránea a la tabla repartidores
     vehiculo_id = Column(Integer, ForeignKey('vehiculos.id_vehiculo'), nullable=True)  # Clave foránea a la tabla vehiculos
     ruta_id = Column(String(20), nullable=True) 
-    costo_id = Column(Integer, ForeignKey('costos.id_costo'), nullable=True)  
     cliente_id = Column(Integer, ForeignKey('clientes.id_cliente'), nullable=True)
-
-
+    combustible = Column(String(100))
+    costo = Column(Float, nullable=False)
     repartidor = relationship('Repartidor', back_populates='pedidos')
     vehiculo = relationship('Vehiculo', back_populates='pedidos')
-    costo = relationship('Costo', back_populates='pedidos')
     cliente = relationship('Cliente', back_populates='pedidos')
 
     def __repr__(self):

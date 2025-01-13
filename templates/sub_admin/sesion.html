@@ -45,10 +45,10 @@
                                 <td>{{ pedido.repartidor.nombre }} {{ pedido.repartidor.apellidos }}</td>
                                 <td>{{ pedido.vehiculo.placas }}</td>
                                 <td>{{pedido.ruta_id}}</td>
-                                <td>${{ pedido.costo.total_costo }}</td>
+                                <td>${{ pedido.costo}}</td>
                                
                                 <td>
-                                    <a  class="btn-editar">Editar</a>
+                                    <a href="{{ url_for('actualizar_pedido', id=pedido.id_pedido) }}"  class="btn-editar">Editar</a>
                                     <a href="{{ url_for('eliminar_pedido', id=pedido.id_pedido) }}" class="btn-eliminar">Eliminar</a>
                                     <a href="{{ url_for('generar_pdf', id_pedido=pedido.id_pedido) }}">Formato</a>
                                 </td>

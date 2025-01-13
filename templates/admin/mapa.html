@@ -9,6 +9,7 @@
     <title>Visualizador de rutas</title>
     <link rel="stylesheet" href="/static/css/vendedores.css">
     <link rel="stylesheet" href="/static/css/mapa.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
       
     </style>
@@ -48,9 +49,9 @@
         const clientes = JSON.parse('{{ datos_clientes_json | tojson }}');
         var iconUrl = 'static/images/cliente.png';
     
-        // Variables para almacenar la ruta actual y el marcador seleccionado
+        // Variables para almacenar los marcadores seleccionados y la ruta actual
+        var selectedMarkers = [];
         var currentRoute = null;
-        var currentMarker = null;
     
         clientes.forEach(function(cliente) {
             var lat = parseFloat(cliente.latitud);
@@ -65,74 +66,81 @@
                 })
             }).addTo(map);
     
-            // Crear el contenido inicial del popup
             var popupContent = `
                 <b>Clave:</b> ${cliente.clave}<br>
                 <b>Cliente:</b> ${cliente.nombre} ${cliente.apellidos}<br>
                 <b>Vendedor:</b> ${cliente.vendedor} ${cliente.vape}<br>
-                <b>Haga clic para ver la ruta</b>
+                <b>Municipio:</b> ${cliente.municipio}<br>
+                <b>Haga clic para seleccionar</b>
             `;
     
             marker.bindPopup(popupContent);
     
-            // Vincular al evento click del marcador
+            // Al hacer clic, alternar selección del marcador
             marker.on('click', function() {
-                // Si se hace clic en el mismo marcador, ocultar la ruta actual
-                if (currentMarker === marker) {
-                    if (currentRoute) {
-                        map.removeLayer(currentRoute);
-                        currentRoute = null;
-                        currentMarker = null;
-                    }
+                if (selectedMarkers.includes(marker)) {
+                    // Deseleccionar
+                    selectedMarkers = selectedMarkers.filter(m => m !== marker);
+                    marker.setIcon(L.icon({ iconUrl: iconUrl, iconSize: [30, 30] }));
+                } else {
+                    // Seleccionar
+                    selectedMarkers.push(marker);
+                    marker.setIcon(L.icon({ iconUrl: 'static/images/seleccionado.svg', iconSize: [30, 30] }));
+                }
+            });
+        });
+    
+       
+        var button = L.control({ position: 'topright' });
+        button.onAdd = function(map) {
+            var div = L.DomUtil.create('div', 'generate-route-button');
+            div.innerHTML = '<button><i class="bi bi-save2-fill"></i></button>';
+            div.style.padding = '10px';
+            div.style.backgroundColor = 'white';
+            div.style.borderRadius = '5px';
+    
+            div.addEventListener('click', function() {
+                if (selectedMarkers.length < 2) {
+                    alert('Por favor selecciona al menos dos marcadores.');
                     return;
                 }
     
-                // Actualizar el marcador actual
-                currentMarker = marker;
+                // Obtener coordenadas de los marcadores seleccionados
+                var waypoints = selectedMarkers.map(marker => 
+                    `${marker.getLatLng().lng},${marker.getLatLng().lat}`
+                );
+                waypoints.unshift(`${marcador1.getLatLng().lng},${marcador1.getLatLng().lat}`); // Incluir punto inicial
     
-                var osrmUrl = `https://router.project-osrm.org/route/v1/driving/${marcador1.getLatLng().lng},${marcador1.getLatLng().lat};${lon},${lat}?geometries=geojson`;
+                var osrmUrl = `https://router.project-osrm.org/route/v1/driving/${waypoints.join(';')}?geometries=geojson`;
     
                 fetch(osrmUrl)
                     .then(response => response.json())
                     .then(data => {
                         if (data.routes && data.routes.length > 0) {
                             var route = data.routes[0];
-    
-                            // Distancia total en kilómetros
                             var distanceKm = (route.distance / 1000).toFixed(2);
-    
-                            // Duración total en minutos
                             var durationMinutes = (route.duration / 60).toFixed(2);
     
-                            // Eliminar la ruta anterior si existe
                             if (currentRoute) {
                                 map.removeLayer(currentRoute);
                             }
     
-                            // Dibujar la nueva ruta
                             var coordinates = route.geometry.coordinates;
                             var latLngs = coordinates.map(coord => [coord[1], coord[0]]);
                             currentRoute = L.polyline(latLngs, { color: 'blue', weight: 4 }).addTo(map);
     
-                            // Actualizar el contenido del popup con distancia y duración
-                            var updatedPopupContent = `
-                                <b>Clave:</b> ${cliente.clave}<br>
-                                <b>Cliente:</b> ${cliente.nombre} ${cliente.apellidos}<br>
-                                <b>Vendedor:</b> ${cliente.vendedor} ${cliente.vape}<br>
-                                <b>Distancia:</b> ${distanceKm} km<br>
-                                <b>Duración:</b> ${durationMinutes} minutos
-                            `;
-                            marker.bindPopup(updatedPopupContent).openPopup();
-    
-                            // Ajustar la vista del mapa para mostrar la ruta completa
+                            alert(`Ruta generada:\nDistancia total: ${distanceKm} km\nDuración estimada: ${durationMinutes} minutos`);
                             map.fitBounds(currentRoute.getBounds());
                         } else {
-                            console.error('No se pudo obtener una ruta válida:', data);
+                            console.error('No se pudo generar la ruta:', data);
                         }
                     })
                     .catch(error => console.error('Error al solicitar la ruta:', error));
             });
-        });
+    
+            return div;
+        };
+        button.addTo(map);
     
         // Ajustar la vista del mapa para mostrar todos los marcadores
         var bounds = clientes.map(function(cliente) {
@@ -140,7 +148,45 @@
         });
         bounds.push([19.7887059, -99.8736229]); // Añadir el punto de partida
         map.fitBounds(bounds);
+
+        // Botón para resetear la ruta
+var resetButton = L.control({ position: 'topright' });
+resetButton.onAdd = function(map) {
+    var div = L.DomUtil.create('div', 'reset-route-button');
+    div.innerHTML = '<button><i class="bi bi-layer-backward"></i></button>';
+    div.style.padding = '10px';
+    div.style.backgroundColor = 'white';
+    div.style.borderRadius = '5px';
+    div.style.marginTop = '5px'; // Espaciado entre botones
+
+    div.addEventListener('click', function() {
+        if (currentRoute) {
+            map.removeLayer(currentRoute); // Eliminar la ruta del mapa
+            currentRoute = null;
+        }
+
+        // Restaurar los iconos originales de los marcadores seleccionados
+        selectedMarkers.forEach(marker => {
+            marker.setIcon(L.icon({
+                iconUrl: iconUrl,
+                iconSize: [30, 30],
+                iconAnchor: [15, 30],
+                popupAnchor: [0, -30]
+            }));
+        });
+
+        // Limpiar el array de marcadores seleccionados
+        selectedMarkers = [];
+
+        alert('Ruta reseteada y marcadores deseleccionados.');
+    });
+
+    return div;
+};
+resetButton.addTo(map);
+
     </script>
+    
     
     
  

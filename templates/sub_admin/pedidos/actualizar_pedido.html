@@ -9,13 +9,13 @@
 <body>
     <div class="form-container">
         <h2>REGISTRO DE UN NUEVO PEDIDO</h2>
-        <form action="{{url_for('agregar_pedido')}}" method="POST" enctype="multipart/form-data">
+        <form action="{{url_for('actualizar_pedido', id=pedido.id_pedido)}}" method="POST" enctype="multipart/form-data">
 
             
             <div class="form-group">
                 <label for="cliente_id">CLIENTE</label>
                 <select id="cliente_id" name="cliente_id" required>
-                    <option value="">Seleccione un cliente</option>  <!-- Opción por defecto -->
+                    <option value="{{pedido.id_pedido}}">{{pedido.cliente.nombre}} {{pedido.cliente.apellidos}}</option>  <!-- Opción por defecto -->
                     {% for cliente in clientes %}
                         <option value="{{ cliente.id_cliente }}">{{ cliente.nombre }} {{ cliente.apellidos }}</option>
                     {% endfor %}
@@ -24,23 +24,23 @@
             
             <div class="form-group">
                 <label for="nombre">FECHA</label>
-                <input type="date" id="fecha" name="fecha" required>
+                <input type="date" id="fecha" name="fecha" >
             </div>
             <div class="form-group">
                 <label for="apellidos">HORA INICIO</label>
-                <input type="time" id="hora_inicio" name="hora_inicio" required>
+                <input type="time" id="hora_inicio" name="hora_inicio" >
             </div>
 
             <div class="form-group">
                 <label for="apellidos">HORA FIN</label>
-                <input type="time" id="hora_fin" name="hora_fin" required>
+                <input type="time" id="hora_fin" name="hora_fin" >
             </div>
 
 
             <div class="form-group">
                 <label for="repartidor_id">REPARTIDOR</label>
                 <select id="repartidor_id" name="repartidor_id" required>
-                    <option value="">Seleccione un repartidor</option>  <!-- Opción por defecto -->
+                    <option value="{{pedido.repartidor.nombre}}">{{pedido.repartidor.nombre}}</option>  <!-- Opción por defecto -->
                     {% for repartidor in repartidores %}
                         <option value="{{ repartidor.id_repartidor }}">{{ repartidor.nombre }} {{ repartidor.apellidos }}</option>
                     {% endfor %}
@@ -51,29 +51,33 @@
             <div class="form-group">
                 <label for="vehiculo_id">VEHICULO</label>
                 <select id="vehiculo_id" name="vehiculo_id" required>
-                    <option value="">{{pedido.vehiculo.nombre}}</option>
+                    <option value="{{pedido.vehiculo.modelo}}">{{pedido.vehiculo.modelo}}</option>
                     {% for vehiculo in vehiculos %}
-                        <option value="{{ vehiculo.id_vehiculo }}">{{ vehiculo.placas }}</option>
+                        <option value="{{ vehiculo.id_vehiculo }}">{{ vehiculo.modelo }}</option>
                     {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="combustible">TIPO DE COMBUSTIBLE</label>
+                <select id="combustible" name="combustible" required>
+                    <option value="{{pedido.combustible}}">{{pedido.combustible}}</option>
+                    <option value="gasolina">Gasolina</option>
+                    <option value="diesel">Diesel</option>
+                   
                 </select>
             </div>
             
-            <div class="form-group">
-                <label for="telefono">RUTA</label>
-                <input type="text" id="ruta_id" name="ruta_id" required>
-            </div>
-
-            <div class="form-group">
-                <label for="costo_id">COSTO</label>
-                <select id="costo_id" name="costo_id" required>
-                    <option value="">Seleccione el costo</option>  <!-- Opción por defecto -->
-                    {% for costo in costos %}
-                        <option value="{{ costo.id_costo }}">{{ costo.total_costo }}</option>
-                    {% endfor %}
+             <div class="form-group">
+                <label for="ruta_id">SELECCIONA UNA RUTA</label>
+                <select id="ruta_id" name="ruta_id" required>
+                    <option value="1">Ruta 1</option>
+                    <option value="2">Ruta 2</option>
+                   
                 </select>
             </div>
-          
 
+           
     
             <div class="form-actions">
                 <a href="{{url_for('sub_sesion')}}">
