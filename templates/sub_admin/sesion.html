@@ -20,17 +20,22 @@
                     <button style="background-color: green; color: white; padding: 10px;">Agregar Pedido</button>
                 </a>
             </header>
+            {%include 'search.html'%}
             <section class="table-container">
                 <table>
                     <thead>
                         <tr>
                             <th>Id</th>
                             <th>Fecha</th>
-                            <th>Hora de inicio</th>
-                            <th>Hora de fin</th>
+                            <th>Repartidor</th>
+                            <th>Vehiculo</th>
+                            <th>Combustible</th>
+                            <th>Total kms</th>
+                            <th>Total tiempo</th>
+                            <th>H.I.</th>
+                            <th>H.F. </th>
                             <th>Cliente</th>
                             <th>Vehiculo</th>
-
                             <th>Costo</th>
                             <th>Opciones</th>
                         </tr>
@@ -40,23 +45,30 @@
                             <tr>
                                 <td>{{ pedido.id_pedido }}</td>
                                 <td>{{ pedido.fecha }}</td>
+                                <td>{{pedido.repartidor.nombre}}</td>
+                                <td>{{ pedido.vehiculo.placas }}</td>
+                                <td>{{ pedido.combustible}}</td>
+                                <td>{{ pedido.distancia}}</td>
+                                <td>{{ pedido.tiempo_total}}</td>
                                 <td>{{ pedido.hora_inicio }}</td>
+
                                 <td>{{ pedido.hora_fin }}</td>
                                 <td>{{ pedido.cliente.nombre }} {{ pedido.cliente.apellidos }}</td>
-                                <td>{{ pedido.vehiculo.placas }}</td>
+                                <td>{{ pedido.vehiculo.modelo }}</td>
                             
                                 <td>${{ pedido.costo}}</td>
                                
                                 <td>
-                                    <a href="{{ url_for('actualizar_pedido', id=pedido.id_pedido) }}"  class="btn-editar">Editar</a>
-                                    <a href="{{ url_for('eliminar_pedido', id=pedido.id_pedido) }}" class="btn-eliminar">Eliminar</a>
-                                    <a href="{{ url_for('generar_pdf', id_pedido=pedido.id_pedido) }}">Formato</a>
+                                    <a href="{{ url_for('actualizar_pedido', id=pedido.id_pedido) }}"  class="btn-editar">Editar</a><br><br>
+                                    <a href="{{ url_for('eliminar_pedido', id=pedido.id_pedido) }}" class="btn-eliminar">Eliminar</a><br><br>
+                                    <a href="{{ url_for('generar_pdf', id_pedido=pedido.id_pedido) }}">Formato</a><br>
                                 </td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </section>
+            {% include 'paginado.html' %}
         </main>
     </div>
 </body>

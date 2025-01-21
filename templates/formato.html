@@ -37,7 +37,6 @@
     </style>
 </head>
 <body>
-  
     <h2 style="text-align: center;">RECIBO DE PEDIDO - AGROQUÍMICOS DEL NORTE</h2>
     <p>Fecha de pedido: {{ fecha_pedido }}</p>
     <table>
@@ -53,7 +52,7 @@
             <th>Vehículo</th>
             <td>{{ vehiculo }}</td>
         </tr>
-    
+        <tr>
             <th>Hora de Inicio</th>
             <td>{{ hora_inicio }}</td>
         </tr>
@@ -63,12 +62,15 @@
         </tr>
         <tr>
             <th>Distancia recorrida</th>
-            <td>140.89km</td>
+            <td>{{ distancia }} km</td>
         </tr>
-
         <tr>
             <th>Costo Total</th>
             <td>${{ costo }}</td>
+        </tr>
+        <tr>
+            <th>Cliente</th>
+            <td>{{ cliente_nombre }} {{ cliente_apellidos }}</td>
         </tr>
     </table>
     <div class="firma">
@@ -82,4 +84,5 @@
         </div>
     </div>
 </body>
+
 </html>

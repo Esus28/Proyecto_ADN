@@ -1,0 +1,58 @@
+<form method="get" action="{{ request.path }}">
+    <input 
+        type="text" 
+        class="search-bar" 
+        placeholder="Buscar..." 
+        id="searchInput" 
+        name="search" 
+        value="{{ search_query }}">
+    <button class="search-button" type="submit">Buscar</button>
+</form>
+
+<style>
+
+/* Contenedor de la barra de búsqueda */
+.search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+/* Estilos de la barra de búsqueda */
+.search-bar {
+    width: 250px;
+    padding: 10px;
+    border: 2px solid green ;  /* Color de borde (personalizable) */
+    border-radius: 20px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease;
+    margin-left: 60%;
+}
+
+/* Cambiar color del borde cuando el campo está enfocado */
+.search-bar:focus {
+    border-color: #2ecc71;  /* Color verde cuando está enfocado (personalizable) */
+}
+
+/* Estilos del botón de búsqueda */
+.search-button {
+    background-color: green;  /* Color de fondo del botón (personalizable) */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: 10px;
+    transition: background-color 0.3s ease;
+}
+
+/* Cambiar color del botón cuando se pasa el mouse */
+.search-button:hover {
+    background-color: white;  /* Color al pasar el mouse (personalizable) */
+    color: green;
+}
+
+</style>

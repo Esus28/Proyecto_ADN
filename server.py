@@ -8,6 +8,7 @@ from werkzeug.utils import secure_filename
 from flask import flash, session
 from datetime import datetime
 from math import ceil
+from sqlalchemy import or_
 
 
 from weasyprint import HTML
@@ -113,17 +114,38 @@ def login():
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
-
         return redirect(url_for('login'))
+
+    # Obtén el término de búsqueda del campo del formulario
+    search_query = request.args.get('search', '').strip()
     page = request.args.get('page', 1, type=int)
     per_page = 5
 
+    # Construye la consulta
     query = db_session.query(models.Repartidor)
+    
+    if search_query:
+        # Aplica filtros en múltiples columnas usando `ilike` para una búsqueda case-insensitive
+        query = query.filter(
+            or_(
+                models.Repartidor.nombre.ilike(f"%{search_query}%"),
+                models.Repartidor.apellidos.ilike(f"%{search_query}%"),
+                models.Repartidor.no_licencia.ilike(f"%{search_query}%"),
+                models.Repartidor.telefono.ilike(f"%{search_query}%")
+            )
+        )
+
+    # Paginación
     repartidores_paginated, pagination = paginate(query, page, per_page)
-    
-    
-    return render_template('admin/dashboard.html', username=session['username'], rol=session['rol'], repartidores=repartidores_paginated,
-        pagination=pagination)
+
+    return render_template(
+        'admin/dashboard.html',
+        username=session['username'],
+        rol=session['rol'],
+        repartidores=repartidores_paginated,
+        pagination=pagination,
+        search_query=search_query  # Pasa el término de búsqueda para prellenar el campo
+    )
 
 
 @app.route('/agregar_repartidor', methods=['GET', 'POST'])
@@ -244,16 +266,32 @@ def eliminar_repartidor(id):
 
 @app.route('/vendedores')
 def vendedores():
+    # Obtén el término de búsqueda del campo del formulario
+    search_query = request.args.get('search', '').strip()
     page = request.args.get('page', 1, type=int)
     per_page = 5
 
+    # Construye la consulta
     query = db_session.query(models.Vendedor)
+    
+    if search_query:
+        # Aplica filtros en múltiples columnas usando `ilike` para búsquedas insensibles a mayúsculas/minúsculas
+        query = query.filter(
+            or_(
+                models.Vendedor.nombre.ilike(f"%{search_query}%"),
+                models.Vendedor.apellidos.ilike(f"%{search_query}%"),
+                models.Vendedor.telefono.ilike(f"%{search_query}%")
+            )
+        )
+
+    # Paginación
     vendedores_paginated, pagination = paginate(query, page, per_page)
 
     return render_template(
         '/admin/vendedores.html',
         vendedores=vendedores_paginated,
-        pagination=pagination
+        pagination=pagination,
+        search_query=search_query  # Pasa el término de búsqueda para prellenar el campo
     )
 
 @app.route('/agregar_vendedor', methods=['GET', 'POST'])
@@ -393,19 +431,42 @@ def vista_ruta():
     # No necesitas usar json.dumps porque el filtro 'tojson' de Jinja2 lo hace automáticamente
     return render_template('/admin/mapa.html', datos_clientes_json=datos_clientes)
 
+from sqlalchemy import or_
+
 @app.route('/clientes')
 def clientes():
+    # Obtén el término de búsqueda del formulario
+    search_query = request.args.get('search', '').strip()
     page = request.args.get('page', 1, type=int)
     per_page = 5
 
+    # Construye la consulta base
     query = db_session.query(models.Cliente)
+    
+    if search_query:
+        # Aplica filtros en múltiples columnas usando `ilike` para búsqueda case-insensitive
+        query = query.filter(
+            or_(
+                models.Cliente.nombre.ilike(f"%{search_query}%"),
+                models.Cliente.apellidos.ilike(f"%{search_query}%"),
+                models.Cliente.telefono.ilike(f"%{search_query}%"),
+                models.Cliente.correo.ilike(f"%{search_query}%"),
+                models.Cliente.municipio.ilike(f"%{search_query}%"),
+                models.Cliente.codigo_postal.ilike(f"%{search_query}%"),
+                models.Cliente.clasificacion.ilike(f"%{search_query}%")
+            )
+        )
+
+    # Paginación
     clientes_paginated, pagination = paginate(query, page, per_page)
 
     return render_template(
         '/admin/clientes.html',
         clientes=clientes_paginated,
-        pagination=pagination
+        pagination=pagination,
+        search_query=search_query  # Pasa el término de búsqueda para el campo de texto
     )
+
 
 
 @app.route('/agregar_cliente', methods=['GET', 'POST'])
@@ -530,17 +591,37 @@ def eliminar_cliente(id):
 
 @app.route('/vehiculos')
 def vehiculos():
+    # Obtén el término de búsqueda del campo del formulario
+    search_query = request.args.get('search', '').strip()
     page = request.args.get('page', 1, type=int)
     per_page = 5
 
+    # Construye la consulta
     query = db_session.query(models.Vehiculo)
+
+    if search_query:
+        # Aplica filtros en múltiples columnas usando `ilike` para búsquedas insensibles a mayúsculas/minúsculas
+        query = query.filter(
+            or_(
+                models.Vehiculo.modelo.ilike(f"%{search_query}%"),
+                models.Vehiculo.placas.ilike(f"%{search_query}%"),
+                models.Vehiculo.ultimo_servicio.ilike(f"%{search_query}%"),
+                models.Vehiculo.prox_verifi.ilike(f"%{search_query}%"),
+                models.Vehiculo.ultima_tenencia.ilike(f"%{search_query}%")
+            )
+        )
+
+    # Paginación
     vehiculos_paginated, pagination = paginate(query, page, per_page)
 
     return render_template(
         '/admin/vehiculos.html',
         vehiculos=vehiculos_paginated,
-        pagination=pagination
+        pagination=pagination,
+        search_query=search_query  # Pasa el término de búsqueda para prellenar el campo
     )
+
+
 @app.route('/agregar_vehiculo', methods=['GET', 'POST'])
 def agregar_vehiculo():
     if request.method == 'GET':
@@ -786,10 +867,58 @@ def registrar_ruta():
 
 
 #----------------------------------------------FUNCIONES SUB ADMIN------------------------------------
+
+
 @app.route('/sesion_subadmin')
 def sub_sesion():
-    pedidos = db_session.query(models.Pedido)
-    return render_template('/sub_admin/sesion.html', pedidos=pedidos)
+    # Obtén el término de búsqueda del formulario
+    search_query = request.args.get('search', '').strip()
+    page = request.args.get('page', 1, type=int)
+    per_page = 5  # Número de elementos por página
+
+    # Construye la consulta base
+    query = db_session.query(models.Pedido)
+
+    if search_query:
+        # Aplica filtros en múltiples columnas usando `ilike` para búsquedas case-insensitive
+        query = query.filter(
+            or_(
+                models.Pedido.id_pedido.ilike(f"%{search_query}%"),            # Búsqueda por ID del pedido
+                models.Pedido.fecha.ilike(f"%{search_query}%"),                # Búsqueda por fecha
+                models.Pedido.hora_inicio.ilike(f"%{search_query}%"),          # Búsqueda por hora_inicio
+                models.Pedido.hora_fin.ilike(f"%{search_query}%"),             # Búsqueda por hora_fin
+                models.Pedido.combustible.ilike(f"%{search_query}%"),          # Búsqueda por combustible
+                # Búsqueda por costo
+                models.Cliente.nombre.ilike(f"%{search_query}%"),              # Búsqueda por nombre del cliente
+                models.Repartidor.nombre.ilike(f"%{search_query}%"),           # Búsqueda por nombre del repartidor
+                models.Vehiculo.modelo.ilike(f"%{search_query}%")              # Búsqueda por modelo del vehículo
+              
+            )
+        )
+
+    # Realiza la paginación
+    total_items = query.count()
+    total_pages = (total_items + per_page - 1) // per_page
+    pedidos_paginated = query.offset((page - 1) * per_page).limit(per_page).all()
+
+    # Construye el diccionario de paginación
+    pagination = {
+        'page': page,
+        'total_pages': total_pages,
+        'has_next': page < total_pages,
+        'has_prev': page > 1,
+        'next_page': page + 1 if page < total_pages else None,
+        'prev_page': page - 1 if page > 1 else None,
+    }
+
+    # Renderiza la plantilla
+    return render_template(
+        '/sub_admin/sesion.html',
+        pedidos=pedidos_paginated,
+        pagination=pagination,
+        search_query=search_query
+    )
+
 
 
 @app.route('/agregar_pedido', methods=['GET', 'POST'])
@@ -953,9 +1082,15 @@ def eliminar_pedido(id):
 
 @app.route('/generar_pdf/<int:id_pedido>')
 def generar_pdf(id_pedido):
+    # Obtener el pedido y las relaciones necesarias
+    pedido = db_session.query(models.Pedido) \
+        .join(models.Repartidor) \
+        .join(models.Vehiculo) \
+        .join(models.Cliente) \
+        .filter(models.Pedido.id_pedido == id_pedido) \
+        .first()  # Asegúrate de que solo haya un pedido con ese id
 
-    pedido = db_session.query(models.Pedido).get(id_pedido)
-
+    # Generar el HTML para la plantilla
     html = render_template(
         'formato.html',
         no_pedido=pedido.id_pedido,
@@ -963,19 +1098,25 @@ def generar_pdf(id_pedido):
         hora_inicio=pedido.hora_inicio,
         hora_fin=pedido.hora_fin,
         repartidor=f"{pedido.repartidor.nombre} {pedido.repartidor.apellidos}",
-        vehiculo=pedido.vehiculo.placas,
-        costo=pedido.costo
+        vehiculo=f"{pedido.vehiculo.modelo} - {pedido.vehiculo.placas}",
+        cliente_nombre=f"{pedido.cliente.nombre} {pedido.cliente.apellidos}",
+        costo=pedido.costo,
+        distancia=pedido.distancia,
+        combustible=pedido.combustible,
+        cliente_email=pedido.cliente.correo,
+        cliente_telefono=pedido.cliente.telefono
     )
 
-
+    # Crear el PDF a partir del HTML generado
     pdf = HTML(string=html).write_pdf()
 
-
+    # Configurar la respuesta para enviar el PDF al navegador
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f'attachment; filename=recibo_pedido_{id_pedido}.pdf'
 
     return response
+
 
 
 @app.get('/sub_vista_rutas')
