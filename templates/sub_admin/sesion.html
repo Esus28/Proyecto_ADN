@@ -28,9 +28,9 @@
                             <th>Fecha</th>
                             <th>Hora de inicio</th>
                             <th>Hora de fin</th>
-                            <th>Repartidor</th>
+                            <th>Cliente</th>
                             <th>Vehiculo</th>
-                            <th>Ruta</th>
+
                             <th>Costo</th>
                             <th>Opciones</th>
                         </tr>
@@ -42,9 +42,9 @@
                                 <td>{{ pedido.fecha }}</td>
                                 <td>{{ pedido.hora_inicio }}</td>
                                 <td>{{ pedido.hora_fin }}</td>
-                                <td>{{ pedido.repartidor.nombre }} {{ pedido.repartidor.apellidos }}</td>
+                                <td>{{ pedido.cliente.nombre }} {{ pedido.cliente.apellidos }}</td>
                                 <td>{{ pedido.vehiculo.placas }}</td>
-                                <td>{{pedido.ruta_id}}</td>
+                            
                                 <td>${{ pedido.costo}}</td>
                                
                                 <td>

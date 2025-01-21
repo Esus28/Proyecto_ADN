@@ -7,6 +7,7 @@ from database import db_session
 from werkzeug.utils import secure_filename
 from flask import flash, session
 from datetime import datetime
+from math import ceil
 
 
 from weasyprint import HTML
@@ -43,6 +44,23 @@ def lista_vendores():
 
 Database.metadata.create_all(engine)
 
+
+def paginate(query, page, per_page):
+    """
+    Función genérica para paginar cualquier consulta SQLAlchemy.
+    """
+    total = query.count()
+    items = query.offset((page - 1) * per_page).limit(per_page).all()
+    total_pages = ceil(total / per_page)
+    
+    pagination = {
+        "page": page,
+        "total_pages": total_pages,
+        "has_prev": page > 1,
+        "has_next": page < total_pages,
+    }
+
+    return items, pagination
 
 @app.route('/')
 def home():
@@ -97,9 +115,15 @@ def dashboard():
     if 'user_id' not in session:
 
         return redirect(url_for('login'))
-    repartidores = db_session.query(models.Repartidor)
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
+
+    query = db_session.query(models.Repartidor)
+    repartidores_paginated, pagination = paginate(query, page, per_page)
     
-    return render_template('admin/dashboard.html', username=session['username'], rol=session['rol'],repartidores=repartidores)
+    
+    return render_template('admin/dashboard.html', username=session['username'], rol=session['rol'], repartidores=repartidores_paginated,
+        pagination=pagination)
 
 
 @app.route('/agregar_repartidor', methods=['GET', 'POST'])
@@ -218,13 +242,19 @@ def eliminar_repartidor(id):
     flash("Repartidor eliminado exitosamente.", "success")
     return redirect(url_for('dashboard'))
 
-
-
 @app.route('/vendedores')
 def vendedores():
-    vendedores = db_session.query(models.Vendedor)
-    return render_template('/admin/vendedores.html', vendedores=vendedores)
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
 
+    query = db_session.query(models.Vendedor)
+    vendedores_paginated, pagination = paginate(query, page, per_page)
+
+    return render_template(
+        '/admin/vendedores.html',
+        vendedores=vendedores_paginated,
+        pagination=pagination
+    )
 
 @app.route('/agregar_vendedor', methods=['GET', 'POST'])
 def agregar_vendedor():
@@ -363,12 +393,19 @@ def vista_ruta():
     # No necesitas usar json.dumps porque el filtro 'tojson' de Jinja2 lo hace automáticamente
     return render_template('/admin/mapa.html', datos_clientes_json=datos_clientes)
 
-
-
 @app.route('/clientes')
-def clientes(): 
-    clientes = db_session.query(models.Cliente)
-    return render_template('/admin/clientes.html', clientes=clientes)
+def clientes():
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
+
+    query = db_session.query(models.Cliente)
+    clientes_paginated, pagination = paginate(query, page, per_page)
+
+    return render_template(
+        '/admin/clientes.html',
+        clientes=clientes_paginated,
+        pagination=pagination
+    )
 
 
 @app.route('/agregar_cliente', methods=['GET', 'POST'])
@@ -491,12 +528,19 @@ def eliminar_cliente(id):
     return redirect(url_for('clientes'))
 
 
-
 @app.route('/vehiculos')
-def vehiculos(): 
-    vehiculos = db_session.query(models.Vehiculo)
-    return render_template('/admin/vehiculos.html', vehiculos=vehiculos)
+def vehiculos():
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
 
+    query = db_session.query(models.Vehiculo)
+    vehiculos_paginated, pagination = paginate(query, page, per_page)
+
+    return render_template(
+        '/admin/vehiculos.html',
+        vehiculos=vehiculos_paginated,
+        pagination=pagination
+    )
 @app.route('/agregar_vehiculo', methods=['GET', 'POST'])
 def agregar_vehiculo():
     if request.method == 'GET':
@@ -588,10 +632,18 @@ def eliminar_vehiculo(id):
 
 
 @app.route('/costos')
-def costos(): 
-    costos = db_session.query(models.Costo)
-    return render_template('/admin/costos.html', costos=costos)
+def costos():
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
 
+    query = db_session.query(models.Costo)
+    costos_paginated, pagination = paginate(query, page, per_page)
+
+    return render_template(
+        '/admin/costos.html',
+        costos=costos_paginated,
+        pagination=pagination
+    )
 
 @app.route('/agregar_costo', methods=['GET', 'POST'])
 def agregar_costo():
@@ -763,10 +815,11 @@ def agregar_pedido():
     repartidor_id = request.form.get('repartidor_id')
     vehiculo_id = request.form.get('vehiculo_id')
     cliente_id = request.form.get('cliente_id')
-    ruta_id = request.form.get('ruta_id')
     combustible = request.form.get('combustible')
-    distancia = 140.89
-    tiempo_recorrido = 2.30
+
+    # Convertir distancia y tiempo_total a float
+    distancia = float(request.form.get('distancia', 0))  # Valor predeterminado 0 si no está presente
+    tiempo_total = float(request.form.get('tiempo', 0))
 
     # Obtener el vehículo para calcular el consumo de combustible
     vehiculo = db_session.query(models.Vehiculo).filter_by(id_vehiculo=vehiculo_id).first()
@@ -781,7 +834,7 @@ def agregar_pedido():
     costo_combustible = litros_consumidos * precio_por_litro
 
     # Agregar un costo adicional por tiempo de recorrido (ejemplo: 10 por hora)
-    costo_total = costo_combustible + (tiempo_recorrido * 10)
+    costo_total = costo_combustible + (tiempo_total * 10)
 
     # Crear el nuevo pedido
     nuevo_pedido = models.Pedido(
@@ -791,9 +844,10 @@ def agregar_pedido():
         repartidor_id=repartidor_id,
         vehiculo_id=vehiculo_id,
         cliente_id=cliente_id,
-        ruta_id=ruta_id,
         combustible=combustible,
-        costo=costo_total
+        costo=costo_total,
+        distancia=distancia,
+        tiempo_total=tiempo_total
     )
 
     # Guardar en la base de datos
@@ -831,10 +885,9 @@ def actualizar_pedido(id):
     repartidor_id = request.form.get('repartidor_id')
     vehiculo_id = request.form.get('vehiculo_id')
     cliente_id = request.form.get('cliente_id')
-    ruta_id = request.form.get('ruta_id')
     combustible = request.form.get('combustible')
-    distancia = 140.89  # Ejemplo de distancia
-    tiempo_recorrido = 2.30  # Ejemplo de tiempo
+    distancia = float(request.form.get('distancia', 0))  # Valor predeterminado 0 si no está presente
+    tiempo_total = float(request.form.get('tiempo', 0))
 
     # Obtener el vehículo para calcular el consumo de combustible
     vehiculo = db_session.query(models.Vehiculo).filter_by(id_vehiculo=vehiculo_id).first()
@@ -849,7 +902,7 @@ def actualizar_pedido(id):
     costo_combustible = litros_consumidos * precio_por_litro
 
     # Agregar un costo adicional por tiempo de recorrido (ejemplo: 10 por hora)
-    costo_total = costo_combustible + (tiempo_recorrido * 10)
+    costo_total = costo_combustible + (tiempo_total * 10)
 
     # Actualizar los valores del pedido
     if fecha:
@@ -864,13 +917,16 @@ def actualizar_pedido(id):
         pedido.vehiculo_id = vehiculo_id
     if cliente_id:
         pedido.cliente_id = cliente_id
-    if ruta_id:
-        pedido.ruta_id = ruta_id
     if combustible:
         pedido.combustible = combustible
-    pedido.costo = costo_total  # Actualizar el costo total calculado
+   
+    if costo_total:
+        pedido.costo = costo_total  
+    
+    if tiempo_total:
+        pedido.tiempo_total = tiempo_total
 
-    # Guardar los cambios en la base de datos
+   
     db_session.add(pedido)
     db_session.commit()
 
@@ -908,7 +964,6 @@ def generar_pdf(id_pedido):
         hora_fin=pedido.hora_fin,
         repartidor=f"{pedido.repartidor.nombre} {pedido.repartidor.apellidos}",
         vehiculo=pedido.vehiculo.placas,
-        ruta=pedido.ruta_id,
         costo=pedido.costo
     )
 

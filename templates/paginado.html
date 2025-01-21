@@ -1,0 +1,78 @@
+<nav aria-label="Page navigation example">
+    <ul class="custom-pagination">
+        <li class="page-item {% if not pagination['has_prev'] %}disabled{% endif %}">
+            <a class="page-link" href="?page={{ pagination['page'] - 1 }}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+
+        {% for i in range(1, pagination['total_pages'] + 1) %}
+        <li class="page-item {% if pagination['page'] == i %}active{% endif %}">
+            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+        </li>
+        {% endfor %}
+
+        <li class="page-item {% if not pagination['has_next'] %}disabled{% endif %}">
+            <a class="page-link" href="?page={{ pagination['page'] + 1 }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+
+
+
+
+
+
+<style>
+.custom-pagination {
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center; /* Alinea verticalmente */
+    list-style: none;
+    padding: 0;
+    margin: 20px auto; /* Centra con margen automático */
+}
+
+/* Estilo de los elementos de la paginación */
+.custom-pagination .page-item {
+    margin: 0 5px;
+}
+
+/* Estilo de los enlaces de paginación */
+.custom-pagination .page-link {
+    display: block;
+    padding: 10px 15px;
+    text-decoration: none;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    color: white; /* Color de texto inicial */
+    background-color: #697B46; /* Fondo inicial */
+    transition: all 0.3s ease;
+}
+
+/* Colores al pasar el mouse (hover) */
+.custom-pagination .page-link:hover {
+    background-color: white; /* Fondo al pasar el mouse */
+    color: #697B46; /* Color de texto al pasar el mouse */
+    border-color: #697B46; /* Borde al pasar el mouse */
+}
+
+/* Estilo para el elemento activo */
+.custom-pagination .page-item.active .page-link {
+    background-color: white; /* Fondo del elemento activo */
+    color: #697B46; /* Color de texto del elemento activo */
+    border-color: #697B46; /* Borde del elemento activo */
+}
+
+/* Deshabilitar enlaces */
+.custom-pagination .page-item.disabled .page-link {
+    color: #ccc; /* Color del texto deshabilitado */
+    pointer-events: none; /* Deshabilitar clic */
+    background-color: #f9f9f9; /* Fondo del elemento deshabilitado */
+    border-color: #ddd; /* Borde del elemento deshabilitado */
+}
+
+</style>

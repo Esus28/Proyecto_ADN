@@ -151,13 +151,15 @@ class Pedido(Database):
     hora_fin = Column(String(20), nullable=True)  # Tipo VARCHAR(20), puede ser nulo
     repartidor_id = Column(Integer, ForeignKey('repartidores.id_repartidor'), nullable=True)  # Clave foránea a la tabla repartidores
     vehiculo_id = Column(Integer, ForeignKey('vehiculos.id_vehiculo'), nullable=True)  # Clave foránea a la tabla vehiculos
-    ruta_id = Column(String(20), nullable=True) 
     cliente_id = Column(Integer, ForeignKey('clientes.id_cliente'), nullable=True)
+    tiempo_total = Column(Integer)
+    distancia = Column(Float)
     combustible = Column(String(100))
     costo = Column(Float, nullable=False)
     repartidor = relationship('Repartidor', back_populates='pedidos')
     vehiculo = relationship('Vehiculo', back_populates='pedidos')
     cliente = relationship('Cliente', back_populates='pedidos')
+    
 
     def __repr__(self):
         return f"<Pedido(id_pedido={self.id_pedido}, fecha={self.fecha}, hora_inicio={self.hora_inicio}, hora_fin={self.hora_fin})>"

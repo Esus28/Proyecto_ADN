@@ -14,8 +14,8 @@
             
             <div class="form-group">
                 <label for="cliente_id">CLIENTE</label>
-                <select id="cliente_id" name="cliente_id" required>
-                    <option value="{{pedido.id_pedido}}">{{pedido.cliente.nombre}} {{pedido.cliente.apellidos}}</option>  <!-- Opción por defecto -->
+                <select id="cliente_id" name="cliente_id" >
+                    <option value="{{pedido.id_cliente}}">{{pedido.cliente.nombre}} {{pedido.cliente.apellidos}}</option>  <!-- Opción por defecto -->
                     {% for cliente in clientes %}
                         <option value="{{ cliente.id_cliente }}">{{ cliente.nombre }} {{ cliente.apellidos }}</option>
                     {% endfor %}
@@ -24,23 +24,23 @@
             
             <div class="form-group">
                 <label for="nombre">FECHA</label>
-                <input type="date" id="fecha" name="fecha" >
+                <input type="date" id="fecha" value="{{pedido.fecha}}" name="fecha" >
             </div>
             <div class="form-group">
                 <label for="apellidos">HORA INICIO</label>
-                <input type="time" id="hora_inicio" name="hora_inicio" >
+                <input type="time" id="hora_inicio" value="{{pedido.hora_inicio}}" name="hora_inicio" >
             </div>
 
             <div class="form-group">
                 <label for="apellidos">HORA FIN</label>
-                <input type="time" id="hora_fin" name="hora_fin" >
+                <input type="time" id="hora_fin" name="hora_fin" value="{{pedido.hora_fin}}" >
             </div>
 
 
             <div class="form-group">
                 <label for="repartidor_id">REPARTIDOR</label>
-                <select id="repartidor_id" name="repartidor_id" required>
-                    <option value="{{pedido.repartidor.nombre}}">{{pedido.repartidor.nombre}}</option>  <!-- Opción por defecto -->
+                <select id="repartidor_id" name="repartidor_id" >
+                    <option value="{{pedido.repartidor_id}}">{{pedido.repartidor.nombre}}</option>  <!-- Opción por defecto -->
                     {% for repartidor in repartidores %}
                         <option value="{{ repartidor.id_repartidor }}">{{ repartidor.nombre }} {{ repartidor.apellidos }}</option>
                     {% endfor %}
@@ -51,7 +51,7 @@
             <div class="form-group">
                 <label for="vehiculo_id">VEHICULO</label>
                 <select id="vehiculo_id" name="vehiculo_id" required>
-                    <option value="{{pedido.vehiculo.modelo}}">{{pedido.vehiculo.modelo}}</option>
+                    <option value="{{pedido.vehiculo_id}}">{{pedido.vehiculo.modelo}}</option>
                     {% for vehiculo in vehiculos %}
                         <option value="{{ vehiculo.id_vehiculo }}">{{ vehiculo.modelo }}</option>
                     {% endfor %}
@@ -68,16 +68,20 @@
                 </select>
             </div>
             
-             <div class="form-group">
-                <label for="ruta_id">SELECCIONA UNA RUTA</label>
-                <select id="ruta_id" name="ruta_id" required>
-                    <option value="1">Ruta 1</option>
-                    <option value="2">Ruta 2</option>
-                   
-                </select>
+            <div class="form-group">
+                <label for="combustible">DISTANCIA(KM)</label>
+                <input type="numer" id="distancia" value="{{pedido.distancia}}" name="distancia">
+
             </div>
 
-           
+            <div class="form-group">
+                <label for="combustible">TIEMPO(MINS)</label>
+                <input type="numer" id="tiempo" name="tiempo" value="{{pedido.tiempo_total}}" required>
+
+            </div>
+
+
+
     
             <div class="form-actions">
                 <a href="{{url_for('sub_sesion')}}">

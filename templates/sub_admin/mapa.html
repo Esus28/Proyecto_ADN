@@ -28,7 +28,15 @@
         <script src="{{ url_for('static', filename='js/leaflet.js') }}"></script>
 
     </div>
+
    
+ 
+    
+    
+    
+    
+ 
+  
     <script>
         var map = L.map('map').setView([19.7887059, -99.8736229], 10);
     
@@ -49,10 +57,25 @@
         const clientes = JSON.parse('{{ datos_clientes_json | tojson }}');
         var iconUrl = 'static/images/cliente.png';
     
-        // Variables para almacenar los marcadores seleccionados y la ruta actual
         var selectedMarkers = [];
         var currentRoute = null;
+        var counter = 0;
     
+        // Crear iconos con números
+        function createNumberedIcon(number) {
+            return L.divIcon({
+                className: 'custom-number-icon',
+                html: `<div style="position: relative; width: 30px; height: 30px; background-color: #007bff; border-radius: 50%; color: white; font-size: 14px; display: flex; justify-content: center; align-items: center;">
+                           ${number}
+                       </div>`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 30],
+                popupAnchor: [0, -30]
+            });
+        }
+    
+        // Crear marcadores
+        var markers = [];
         clientes.forEach(function(cliente) {
             var lat = parseFloat(cliente.latitud);
             var lon = parseFloat(cliente.longitud);
@@ -66,38 +89,88 @@
                 })
             }).addTo(map);
     
+            marker.cliente = cliente; // Asociar cliente al marcador
+    
             var popupContent = `
                 <b>Clave:</b> ${cliente.clave}<br>
                 <b>Cliente:</b> ${cliente.nombre} ${cliente.apellidos}<br>
-                <b>Vendedor:</b> ${cliente.vendedor} ${cliente.vape}<br>
                 <b>Municipio:</b> ${cliente.municipio}<br>
                 <b>Haga clic para seleccionar</b>
             `;
     
             marker.bindPopup(popupContent);
     
-            // Al hacer clic, alternar selección del marcador
+            // Evento click para selección de marcadores
             marker.on('click', function() {
                 if (selectedMarkers.includes(marker)) {
                     // Deseleccionar
                     selectedMarkers = selectedMarkers.filter(m => m !== marker);
                     marker.setIcon(L.icon({ iconUrl: iconUrl, iconSize: [30, 30] }));
+                    counter--;
+    
+                    // Actualizar los números de los marcadores seleccionados
+                    selectedMarkers.forEach((m, index) => {
+                        m.setIcon(createNumberedIcon(index + 1));
+                    });
                 } else {
                     // Seleccionar
                     selectedMarkers.push(marker);
-                    marker.setIcon(L.icon({ iconUrl: 'static/images/seleccionado.svg', iconSize: [30, 30] }));
+                    counter++;
+    
+                    marker.setIcon(createNumberedIcon(counter));
+                    marker.bindPopup(`${popupContent}<br><b>Seleccionado:</b> ${counter}`).openPopup();
                 }
             });
+    
+            markers.push(marker);
         });
     
-       
+        // Barra de búsqueda
+        var searchControl = L.control({ position: 'topright' });
+        searchControl.onAdd = function(map) {
+            var div = L.DomUtil.create('div', 'search-bar');
+            div.innerHTML = `
+                <input type="text" id="search-input" placeholder="Buscar cliente..." style="width: 200px; padding: 5px;">
+                <button id="search-button" style="padding: 5px;">Buscar</button>
+            `;
+            div.style.backgroundColor = 'white';
+            div.style.borderRadius = '5px';
+            div.style.padding = '10px';
+    
+            return div;
+        };
+        
+        searchControl.addTo(map);
+    
+        document.getElementById('search-button').addEventListener('click', function() {
+            var searchValue = document.getElementById('search-input').value.toLowerCase();
+    
+            // Buscar clientes coincidentes
+            var found = markers.filter(marker => {
+                var cliente = marker.cliente;
+                return cliente.nombre.toLowerCase().includes(searchValue) || cliente.clave.toString().includes(searchValue);
+            });
+    
+            if (found.length > 0) {
+                var bounds = found.map(marker => marker.getLatLng());
+                map.fitBounds(bounds);
+    
+                // Mostrar un popup temporal para el primer cliente encontrado
+                found[0].openPopup();
+            } else {
+                alert('Cliente no encontrado.');
+            }
+        });
+    
+        // Botón para generar rutas
         var button = L.control({ position: 'topright' });
         button.onAdd = function(map) {
             var div = L.DomUtil.create('div', 'generate-route-button');
-            div.innerHTML = '<button><i class="bi bi-save2-fill"></i></button>';
+            div.innerHTML = '<button style="padding: 5px;"><i class="bi bi-bezier"></i></button>';
             div.style.padding = '10px';
             div.style.backgroundColor = 'white';
             div.style.borderRadius = '5px';
+            div.style.marginTop = '5px';
     
             div.addEventListener('click', function() {
                 if (selectedMarkers.length < 2) {
@@ -105,11 +178,10 @@
                     return;
                 }
     
-                // Obtener coordenadas de los marcadores seleccionados
-                var waypoints = selectedMarkers.map(marker => 
+                var waypoints = selectedMarkers.map(marker =>
                     `${marker.getLatLng().lng},${marker.getLatLng().lat}`
                 );
-                waypoints.unshift(`${marcador1.getLatLng().lng},${marcador1.getLatLng().lat}`); // Incluir punto inicial
+                waypoints.unshift(`${marcador1.getLatLng().lng},${marcador1.getLatLng().lat}`);
     
                 var osrmUrl = `https://router.project-osrm.org/route/v1/driving/${waypoints.join(';')}?geometries=geojson`;
     
@@ -139,59 +211,55 @@
             });
     
             return div;
+            
         };
         button.addTo(map);
-    
-        // Ajustar la vista del mapa para mostrar todos los marcadores
-        var bounds = clientes.map(function(cliente) {
-            return [parseFloat(cliente.latitud), parseFloat(cliente.longitud)];
-        });
-        bounds.push([19.7887059, -99.8736229]); // Añadir el punto de partida
-        map.fitBounds(bounds);
 
-        // Botón para resetear la ruta
-var resetButton = L.control({ position: 'topright' });
-resetButton.onAdd = function(map) {
-    var div = L.DomUtil.create('div', 'reset-route-button');
-    div.innerHTML = '<button><i class="bi bi-layer-backward"></i></button>';
+        // Botón para cancelar la generación de rutas
+var cancelButton = L.control({ position: 'topright' });
+
+cancelButton.onAdd = function(map) {
+    var div = L.DomUtil.create('div', 'cancel-route-button');
+    div.innerHTML = '<button style=" padding:5px; background-color: red; color: white;"><i class="bi bi-x-square-fill"></i></button>';
     div.style.padding = '10px';
     div.style.backgroundColor = 'white';
     div.style.borderRadius = '5px';
-    div.style.marginTop = '5px'; // Espaciado entre botones
+    div.style.marginTop = '5px';
 
     div.addEventListener('click', function() {
         if (currentRoute) {
-            map.removeLayer(currentRoute); // Eliminar la ruta del mapa
+            // Eliminar la ruta del mapa
+            map.removeLayer(currentRoute);
             currentRoute = null;
+
+            // Restaurar los íconos originales de los marcadores seleccionados
+            selectedMarkers.forEach(marker => {
+                marker.setIcon(L.icon({
+                    iconUrl: iconUrl,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 30],
+                    popupAnchor: [0, -30]
+                }));
+            });
+
+            // Limpiar la selección
+            selectedMarkers = [];
+            counter = 0;
+
+            alert('Ruta cancelada y selección reiniciada.');
+        } else {
+            alert('No hay ninguna ruta para cancelar.');
         }
-
-        // Restaurar los iconos originales de los marcadores seleccionados
-        selectedMarkers.forEach(marker => {
-            marker.setIcon(L.icon({
-                iconUrl: iconUrl,
-                iconSize: [30, 30],
-                iconAnchor: [15, 30],
-                popupAnchor: [0, -30]
-            }));
-        });
-
-        // Limpiar el array de marcadores seleccionados
-        selectedMarkers = [];
-
-        alert('Ruta reseteada y marcadores deseleccionados.');
     });
 
     return div;
 };
-resetButton.addTo(map);
+
+// Agregar el botón al mapa
+cancelButton.addTo(map);
 
     </script>
     
-    
-    
- 
-  
-      
       
       
       
