@@ -34,7 +34,7 @@
                             <th>Total tiempo</th>
                             <th>H.I.</th>
                             <th>H.F. </th>
-                            <th>Cliente</th>
+                            <th>Clientes</th>
                             <th>Vehiculo</th>
                             <th>Costo</th>
                             <th>Opciones</th>
@@ -53,14 +53,20 @@
                                 <td>{{ pedido.hora_inicio }}</td>
 
                                 <td>{{ pedido.hora_fin }}</td>
-                                <td>{{ pedido.cliente.nombre }} {{ pedido.cliente.apellidos }}</td>
+                             <td>
+                {% for cliente in pedido.clientes %}
+                    <p>{{ cliente.nombre }} {{ cliente.apellidos }}</p>
+                {% else %}
+                    <p>No hay clientes asociados</p>
+                {% endfor %}
+            </td>
                                 <td>{{ pedido.vehiculo.modelo }}</td>
                             
                                 <td>${{ pedido.costo}}</td>
                                
                                 <td>
-                                    <a href="{{ url_for('actualizar_pedido', id=pedido.id_pedido) }}"  class="btn-editar">Editar</a><br><br>
-                                    <a href="{{ url_for('eliminar_pedido', id=pedido.id_pedido) }}" class="btn-eliminar">Eliminar</a><br><br>
+                                    <a href="{{ url_for('actualizar_pedido', id=pedido.id_pedido) }}"  class="btn-editar">Editar</a><br><br><br>
+                                    <a href="{{ url_for('eliminar_pedido', id=pedido.id_pedido) }}" class="btn-eliminar">Eliminar</a><br><br><br>
                                     <a href="{{ url_for('generar_pdf', id_pedido=pedido.id_pedido) }}">Formato</a><br>
                                 </td>
                             </tr>

@@ -5,22 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agregar Pedido</title>
     <link rel="stylesheet" href="/static/css/agregar_repartidor.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<style>
+
+    /* Ajustar el ancho del Select2 */
+    .select2-container {
+        width: 600px !important; /* Se asegura de que ocupe todo el ancho */
+    }
+
+    /* Ajustar la altura del campo cuando está cerrado */
+    .select2-selection {
+        min-height: 50px !important;  /* Aumenta la altura */
+        font-size: 16px !important;   /* Aumenta el tamaño del texto */
+        padding: 10px !important;     /* Más espacio interno */
+        display: flex;
+        align-items: center;
+    }
+
+    /* Ajustar la altura y el tamaño del texto en el dropdown */
+    .select2-results__option {
+        font-size: 18px !important;  /* Texto más grande en la lista */
+        padding: 12px !important;    /* Espaciado en cada opción */
+    }
+
+</style>
+<script>
+    $(document).ready(function() {
+        $('#cliente_id').select2({
+            placeholder: "Busca y selecciona clientes",
+            allowClear: true
+        });
+    });
+</script>
 </head>
 <body>
     <div class="form-container">
-        <h2>REGISTRO DE UN NUEVO PEDIDO</h2>
-        <form action="{{url_for('agregar_pedido')}}" method="POST" enctype="multipart/form-data">
+        
+        <form action="{{url_for('agregar_pedido')}}" style="margin-top: 15em;" method="POST" enctype="multipart/form-data">
 
-            
+            <h2>REGISTRO DE UN NUEVO PEDIDO</h2>
             <div class="form-group">
-                <label for="cliente_id">CLIENTE</label>
-                <select id="cliente_id" name="cliente_id" required>
-                    <option value="">Seleccione un cliente</option>  <!-- Opción por defecto -->
+                <label for="cliente_id">CLIENTES</label>
+                <select id="cliente_id" name="cliente_id" multiple required>
                     {% for cliente in clientes %}
                         <option value="{{ cliente.id_cliente }}">{{ cliente.nombre }} {{ cliente.apellidos }}</option>
                     {% endfor %}
                 </select>
+                
             </div>
+            
             
             <div class="form-group">
                 <label for="nombre">FECHA</label>
@@ -76,7 +111,12 @@
             <div class="form-group">
                 <label for="combustible">TIEMPO(MINS)</label>
                 <input type="text" id="tiempo" name="tiempo" required>
+            </div>
 
+            
+            <div class="form-group">
+                <label for="combustible">TOTAL DE CAJAS</label>
+                <input type="number" id="cajas" name="cajas" required>
             </div>
             
           

@@ -8,7 +8,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import Date
 from sqlalchemy import Float
 from sqlalchemy import Time
-
+from sqlalchemy import Table
 #-------- MODELS USUARIOS---------#
 class Usuario(Database):
     __tablename__ = 'usuarios'
@@ -77,11 +77,42 @@ class Cliente(Database):
     vendedor = relationship('Vendedor', back_populates='clientes')
     costos = relationship('Costo', back_populates='cliente')
     rutas = relationship('Ruta', back_populates='cliente')
-    pedidos = relationship('Pedido', back_populates='cliente')
+    pedidos = relationship('Pedido', secondary='pedido_clientes', back_populates='clientes')
 
     def __repr__(self):
         return f"<Cliente(id_cliente={self.id_cliente}, nombre={self.nombre}, apellidos={self.apellidos}, telefono={self.telefono}correo={self.correo}, ubicacion={self.ubicacion}, municipio={self.municipio}, codigo_postal={self.codigo_postal}, vendedor_id={self.vendedor_id})>"
 
+# Tabla intermedia para la relación muchos a muchos entre Pedido y Cliente
+pedido_clientes = Table(
+    'pedido_clientes',
+    Database.metadata,
+    Column('id_pedido', Integer, ForeignKey('pedidos.id_pedido'), primary_key=True),
+    Column('id_cliente', Integer, ForeignKey('clientes.id_cliente'), primary_key=True)
+)
+
+class Pedido(Database):
+    __tablename__ = 'pedidos'
+
+    id_pedido = Column(Integer, primary_key=True, autoincrement=True)
+    fecha = Column(Date, nullable=True)
+    hora_inicio = Column(String(20), nullable=True)
+    hora_fin = Column(String(20), nullable=True)
+    repartidor_id = Column(Integer, ForeignKey('repartidores.id_repartidor'), nullable=True)
+    vehiculo_id = Column(Integer, ForeignKey('vehiculos.id_vehiculo'), nullable=True)
+    tiempo_total = Column(Integer)
+    cajas = Column(Integer)
+    distancia = Column(Float)
+    combustible = Column(String(100))
+    costo = Column(Float, nullable=False)
+
+    repartidor = relationship('Repartidor', back_populates='pedidos')
+    vehiculo = relationship('Vehiculo', back_populates='pedidos')
+
+    # Relación muchos a muchos con clientes
+    clientes = relationship('Cliente', secondary=pedido_clientes, back_populates='pedidos')
+
+    def __repr__(self):
+        return f"<Pedido(id_pedido={self.id_pedido}, fecha={self.fecha}, hora_inicio={self.hora_inicio}, hora_fin={self.hora_fin})>"
 
 #-------- MODELS VEHICULOS---------# 
 class Vehiculo(Database):
@@ -141,25 +172,3 @@ class Ruta(Database):
 
 
 
-
-class Pedido(Database):
-    __tablename__ = 'pedidos'
-
-    id_pedido = Column(Integer, primary_key=True, autoincrement=True)  # Clave primaria con auto-incremento
-    fecha = Column(Date, nullable=True)  # Tipo Date, puede ser nulo
-    hora_inicio = Column(String(20), nullable=True)  # Tipo VARCHAR(20), puede ser nulo
-    hora_fin = Column(String(20), nullable=True)  # Tipo VARCHAR(20), puede ser nulo
-    repartidor_id = Column(Integer, ForeignKey('repartidores.id_repartidor'), nullable=True)  # Clave foránea a la tabla repartidores
-    vehiculo_id = Column(Integer, ForeignKey('vehiculos.id_vehiculo'), nullable=True)  # Clave foránea a la tabla vehiculos
-    cliente_id = Column(Integer, ForeignKey('clientes.id_cliente'), nullable=True)
-    tiempo_total = Column(Integer)
-    distancia = Column(Float)
-    combustible = Column(String(100))
-    costo = Column(Float, nullable=False)
-    repartidor = relationship('Repartidor', back_populates='pedidos')
-    vehiculo = relationship('Vehiculo', back_populates='pedidos')
-    cliente = relationship('Cliente', back_populates='pedidos')
-    
-
-    def __repr__(self):
-        return f"<Pedido(id_pedido={self.id_pedido}, fecha={self.fecha}, hora_inicio={self.hora_inicio}, hora_fin={self.hora_fin})>"

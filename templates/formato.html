@@ -70,7 +70,15 @@
         </tr>
         <tr>
             <th>Cliente</th>
-            <td>{{ cliente_nombre }} {{ cliente_apellidos }}</td>
+            {% for cliente in clientes %}}
+            <td>
+            <li>
+                <strong>Nombre:</strong> {{ cliente.nombre }} <br>
+                <strong>Email:</strong> {{ cliente.correo }} <br>
+                <strong>Teléfono:</strong> {{ cliente.telefono }} <br>
+            </li>
+            </td>
+        {% endfor %}
         </tr>
     </table>
     <div class="firma">

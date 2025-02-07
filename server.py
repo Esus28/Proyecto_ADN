@@ -920,7 +920,6 @@ def sub_sesion():
     )
 
 
-
 @app.route('/agregar_pedido', methods=['GET', 'POST'])
 def agregar_pedido():
     repartidores = db_session.query(models.Repartidor)
@@ -943,11 +942,12 @@ def agregar_pedido():
     hora_fin = request.form.get('hora_fin')
     repartidor_id = request.form.get('repartidor_id')
     vehiculo_id = request.form.get('vehiculo_id')
-    cliente_id = request.form.get('cliente_id')
     combustible = request.form.get('combustible')
+    cajas = request.form.get('cajas')
 
-    # Convertir distancia y tiempo_total a float
-    distancia = float(request.form.get('distancia', 0))  # Valor predeterminado 0 si no está presente
+    cliente_ids = request.form.getlist('cliente_id')
+
+    distancia = float(request.form.get('distancia', 0))
     tiempo_total = float(request.form.get('tiempo', 0))
 
     # Obtener el vehículo para calcular el consumo de combustible
@@ -965,41 +965,46 @@ def agregar_pedido():
     # Agregar un costo adicional por tiempo de recorrido (ejemplo: 10 por hora)
     costo_total = costo_combustible + (tiempo_total * 10)
 
-    # Crear el nuevo pedido
+    # Crear un pedido con los datos proporcionados
     nuevo_pedido = models.Pedido(
         fecha=fecha,
         hora_inicio=hora_inicio,
         hora_fin=hora_fin,
         repartidor_id=repartidor_id,
         vehiculo_id=vehiculo_id,
-        cliente_id=cliente_id,
         combustible=combustible,
         costo=costo_total,
+        cajas=cajas,
         distancia=distancia,
         tiempo_total=tiempo_total
     )
 
-    # Guardar en la base de datos
+    # Obtener los clientes seleccionados y asignarlos al pedido
+    clientes_seleccionados = db_session.query(models.Cliente).filter(models.Cliente.id_cliente.in_(cliente_ids)).all()
+    nuevo_pedido.clientes = clientes_seleccionados  # Relacionar los clientes con el pedido
+
+    # Guardar el pedido y los cambios en la base de datos
     db_session.add(nuevo_pedido)
     db_session.commit()
 
-    return redirect('sub_sesion')  # Redirigir a la lista de pedidos
+    return redirect(url_for('sub_sesion'))  # Redirigir a la lista de pedidos
+
 
 
 @app.route('/actualizar_pedido/<id>', methods=['GET', 'POST'])
 def actualizar_pedido(id):
-    pedido = db_session.query(models.Pedido).get(id)  # Obtener el pedido usando el ID
+    pedido = db_session.query(models.Pedido).get(id)
 
     if not pedido:
         flash("El pedido no existe.", "error")
         return redirect(url_for('clientes'))
 
     if request.method == 'GET':
-        # Obtener datos para mostrar en el formulario de actualización
-        repartidores = db_session.query(models.Repartidor)
-        clientes = db_session.query(models.Cliente)
-        vehiculos = db_session.query(models.Vehiculo)
-        costos = db_session.query(models.Costo)
+        repartidores = db_session.query(models.Repartidor).all()
+        clientes = db_session.query(models.Cliente).all()
+        vehiculos = db_session.query(models.Vehiculo).all()
+        costos = db_session.query(models.Costo).all()
+
         return render_template('sub_admin/pedidos/actualizar_pedido.html', 
                                pedido=pedido, 
                                repartidores=repartidores, 
@@ -1012,55 +1017,63 @@ def actualizar_pedido(id):
     hora_inicio = request.form.get('hora_inicio')
     hora_fin = request.form.get('hora_fin')
     repartidor_id = request.form.get('repartidor_id')
+    cajas = request.form.get('cajas')
     vehiculo_id = request.form.get('vehiculo_id')
-    cliente_id = request.form.get('cliente_id')
+    cliente_ids = request.form.getlist('cliente_id')  # Recibe una lista de clientes
     combustible = request.form.get('combustible')
-    distancia = float(request.form.get('distancia', 0))  # Valor predeterminado 0 si no está presente
+    distancia = float(request.form.get('distancia', 0))
     tiempo_total = float(request.form.get('tiempo', 0))
 
-    # Obtener el vehículo para calcular el consumo de combustible
+    print("\n--- Datos Recibidos del Formulario ---")
+    print(f"Fecha: {fecha}, Hora Inicio: {hora_inicio}, Hora Fin: {hora_fin}")
+    print(f"Repartidor ID: {repartidor_id}, Vehículo ID: {vehiculo_id}, Combustible: {combustible}")
+    print(f"Distancia: {distancia}, Tiempo Total: {tiempo_total}, Cajas: {cajas}")
+    print(f"Clientes Seleccionados: {cliente_ids}")
+
     vehiculo = db_session.query(models.Vehiculo).filter_by(id_vehiculo=vehiculo_id).first()
     if not vehiculo:
         return "Error: Vehículo no encontrado", 400
 
-    # Calcular el consumo total en litros
     litros_consumidos = distancia * vehiculo.cpk
-
-    # Calcular el costo basado en el tipo de combustible
     precio_por_litro = 25 if combustible == "gasolina" else 30
     costo_combustible = litros_consumidos * precio_por_litro
-
-    # Agregar un costo adicional por tiempo de recorrido (ejemplo: 10 por hora)
     costo_total = costo_combustible + (tiempo_total * 10)
 
-    # Actualizar los valores del pedido
-    if fecha:
-        pedido.fecha = fecha
-    if hora_inicio:
-        pedido.hora_inicio = hora_inicio
-    if hora_fin:
-        pedido.hora_fin = hora_fin
-    if repartidor_id:
-        pedido.repartidor_id = repartidor_id
-    if vehiculo_id:
-        pedido.vehiculo_id = vehiculo_id
-    if cliente_id:
-        pedido.cliente_id = cliente_id
-    if combustible:
-        pedido.combustible = combustible
-   
-    if costo_total:
-        pedido.costo = costo_total  
-    
-    if tiempo_total:
-        pedido.tiempo_total = tiempo_total
+    print(f"Litros Consumidos: {litros_consumidos}, Costo Combustible: {costo_combustible}, Costo Total: {costo_total}")
 
-   
-    db_session.add(pedido)
-    db_session.commit()
+    # Actualizar datos del pedido
+    print("\n--- Datos Antes de la Actualización ---")
+    print(f"Fecha Anterior: {pedido.fecha}, Nueva Fecha: {fecha}")
+    print(f"Hora Inicio Anterior: {pedido.hora_inicio}, Nueva Hora Inicio: {hora_inicio}")
+    print(f"Repartidor Anterior: {pedido.repartidor_id}, Nuevo Repartidor: {repartidor_id}")
+    print(f"Vehículo Anterior: {pedido.vehiculo_id}, Nuevo Vehículo: {vehiculo_id}")
+    print(f"Costo Anterior: {pedido.costo}, Nuevo Costo: {costo_total}")
+
+    pedido.fecha = fecha
+    pedido.hora_inicio = hora_inicio
+    pedido.hora_fin = hora_fin
+    pedido.repartidor_id = repartidor_id
+    pedido.vehiculo_id = vehiculo_id
+    pedido.combustible = combustible
+    pedido.costo = costo_total
+    pedido.tiempo_total = tiempo_total
+    pedido.cajas = cajas
+
+    # Actualizar relación muchos a muchos de clientes
+    print("\nEliminando Clientes Actuales...")
+    pedido.clientes.clear()
+    db_session.commit()  # Confirmar eliminación
+
+    nuevos_clientes = db_session.query(models.Cliente).filter(models.Cliente.id_cliente.in_(cliente_ids)).all()
+    pedido.clientes.extend(nuevos_clientes)
+
+    print("Clientes después de la actualización:", [c.id_cliente for c in pedido.clientes])
+
+    db_session.commit()  # Guardar los cambios en la base de datos
+    print("Pedido actualizado con éxito.")
 
     flash('Pedido actualizado exitosamente.', 'success')
-    return redirect(url_for('sub_sesion'))  # Redirigir a la lista de pedidos
+    return redirect(url_for('sub_sesion'))
 
 
 @app.get('/eliminar_pedido/<id>')
@@ -1082,13 +1095,29 @@ def eliminar_pedido(id):
 
 @app.route('/generar_pdf/<int:id_pedido>')
 def generar_pdf(id_pedido):
-    # Obtener el pedido y las relaciones necesarias
+    # Obtener el pedido y sus relaciones
     pedido = db_session.query(models.Pedido) \
         .join(models.Repartidor) \
         .join(models.Vehiculo) \
-        .join(models.Cliente) \
         .filter(models.Pedido.id_pedido == id_pedido) \
-        .first()  # Asegúrate de que solo haya un pedido con ese id
+        .first()
+
+    if not pedido:
+        flash("El pedido no existe.", "error")
+        return redirect(url_for('clientes'))
+
+    # Obtener todos los clientes asignados al pedido
+    clientes = pedido.clientes  # Suponiendo que hay una relación 'clientes' en el modelo Pedido
+
+    # Convertir los clientes en una lista de diccionarios
+    clientes_info = [
+        {
+            "nombre": f"{cliente.nombre} {cliente.apellidos}",
+            "correo": cliente.correo,
+            "telefono": cliente.telefono
+        }
+        for cliente in clientes
+    ]
 
     # Generar el HTML para la plantilla
     html = render_template(
@@ -1099,12 +1128,10 @@ def generar_pdf(id_pedido):
         hora_fin=pedido.hora_fin,
         repartidor=f"{pedido.repartidor.nombre} {pedido.repartidor.apellidos}",
         vehiculo=f"{pedido.vehiculo.modelo} - {pedido.vehiculo.placas}",
-        cliente_nombre=f"{pedido.cliente.nombre} {pedido.cliente.apellidos}",
         costo=pedido.costo,
         distancia=pedido.distancia,
         combustible=pedido.combustible,
-        cliente_email=pedido.cliente.correo,
-        cliente_telefono=pedido.cliente.telefono
+        clientes=clientes_info  # Pasamos la lista de clientes
     )
 
     # Crear el PDF a partir del HTML generado
