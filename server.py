@@ -1112,9 +1112,7 @@ def generar_pdf(id_pedido):
     # Convertir los clientes en una lista de diccionarios
     clientes_info = [
         {
-            "nombre": f"{cliente.nombre} {cliente.apellidos}",
-            "correo": cliente.correo,
-            "telefono": cliente.telefono
+            "nombre": f"{cliente.nombre} {cliente.apellidos}"
         }
         for cliente in clientes
     ]

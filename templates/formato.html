@@ -26,13 +26,34 @@
             padding: 10px;
             text-align: left;
         }
+       
+    </style>
+    <style>
         .firma {
             margin-top: 40px;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            align-items: center;
         }
-        .firma div {
+    
+        .firma-repartidor {
+            margin-bottom: 40px;
             text-align: center;
+        }
+    
+        .firma-clientes {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+           
+        }
+    
+        .firma-cliente {
+            text-align: center;
+            margin-top: 40px;
+            max-width: 33%;
+            flex: 1;
         }
     </style>
 </head>
@@ -70,27 +91,34 @@
         </tr>
         <tr>
             <th>Cliente</th>
-            {% for cliente in clientes %}}
+            {% for cliente in clientes %}
             <td>
             <li>
                 <strong>Nombre:</strong> {{ cliente.nombre }} <br>
-                <strong>Email:</strong> {{ cliente.correo }} <br>
-                <strong>Teléfono:</strong> {{ cliente.telefono }} <br>
             </li>
             </td>
         {% endfor %}
         </tr>
     </table>
+
     <div class="firma">
-        <div>
+        <div class="firma-repartidor">
             ______________________________<br>
             Firma Repartidor
         </div>
-        <div>
-            ______________________________<br>
-            Firma del Cliente
+    
+        <div class="firma-clientes">
+            {% for cliente in clientes %}
+            <div class="firma-cliente">
+                ______________________________<br>
+                Firma de {{ cliente.nombre }}
+            </div>
+            {% endfor %}
         </div>
     </div>
+    
+    
+    
 </body>
 
 </html>
