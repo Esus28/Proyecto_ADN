@@ -119,7 +119,7 @@ def dashboard():
     # Obtén el término de búsqueda del campo del formulario
     search_query = request.args.get('search', '').strip()
     page = request.args.get('page', 1, type=int)
-    per_page = 5
+    per_page = 10
 
     # Construye la consulta
     query = db_session.query(models.Repartidor)
@@ -269,7 +269,7 @@ def vendedores():
     # Obtén el término de búsqueda del campo del formulario
     search_query = request.args.get('search', '').strip()
     page = request.args.get('page', 1, type=int)
-    per_page = 5
+    per_page = 10
 
     # Construye la consulta
     query = db_session.query(models.Vendedor)
@@ -431,17 +431,17 @@ def vista_ruta():
     # No necesitas usar json.dumps porque el filtro 'tojson' de Jinja2 lo hace automáticamente
     return render_template('/admin/mapa.html', datos_clientes_json=datos_clientes)
 
-from sqlalchemy import or_
+
 
 @app.route('/clientes')
 def clientes():
     # Obtén el término de búsqueda del formulario
     search_query = request.args.get('search', '').strip()
     page = request.args.get('page', 1, type=int)
-    per_page = 5
+    per_page = 10
 
     # Construye la consulta base
-    query = db_session.query(models.Cliente)
+    query = db_session.query(models.Cliente).order_by(models.Cliente.id_cliente.asc())
     
     if search_query:
         # Aplica filtros en múltiples columnas usando `ilike` para búsqueda case-insensitive
@@ -594,7 +594,7 @@ def vehiculos():
     # Obtén el término de búsqueda del campo del formulario
     search_query = request.args.get('search', '').strip()
     page = request.args.get('page', 1, type=int)
-    per_page = 5
+    per_page = 10
 
     # Construye la consulta
     query = db_session.query(models.Vehiculo)
@@ -715,7 +715,7 @@ def eliminar_vehiculo(id):
 @app.route('/costos')
 def costos():
     page = request.args.get('page', 1, type=int)
-    per_page = 5
+    per_page = 10
 
     query = db_session.query(models.Costo)
     costos_paginated, pagination = paginate(query, page, per_page)
@@ -874,7 +874,7 @@ def sub_sesion():
     # Obtén el término de búsqueda del formulario
     search_query = request.args.get('search', '').strip()
     page = request.args.get('page', 1, type=int)
-    per_page = 5  # Número de elementos por página
+    per_page = 10  # Número de elementos por página
 
     # Construye la consulta base
     query = db_session.query(models.Pedido)

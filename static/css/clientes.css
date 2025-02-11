@@ -17,6 +17,7 @@ body {
 .sidebar {
     background-color: #697B46; /* Verde oscuro */
     width: 15%;
+    height: 1250px;
     min-width: 250px;
     display: flex;
     flex-direction: column;
@@ -69,6 +70,7 @@ body {
     padding: 20px;
     display: flex;
     flex-direction: column;
+    height: 1250px;
 }
 
 .content header {
