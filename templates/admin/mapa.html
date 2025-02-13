@@ -18,7 +18,7 @@
     <div class="container">
         {% include 'admin/src/navbar.html' %}
 
-        <!-- Contenido principal -->
+       
         <main class="content">
             <header>
                 <h1>Vista de Rutas</h1>
@@ -33,12 +33,14 @@
  
     
     
+    <script id="clientes-data" type="application/json">
+        {{ datos_clientes_json | tojson | safe }}
+    </script>
     
     
  
-  
     <script>
-        var map = L.map('map').setView([19.7883106, -99.8711463], 10);
+        var map = L.map('map').setView([19.7887059, -99.8736229], 10);
     
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -51,21 +53,22 @@
             popupAnchor: [0, -32]
         });
     
-        var marcador1 = L.marker([19.7883106, -99.8711463], { icon: AND }).addTo(map)
-            .bindPopup("<b>Agroquímicos del Norte-Sede-Atlacomulco.</b>");
+        var marcador1 = L.marker([19.7887059, -99.8736229], { icon: AND }).addTo(map)
+            .bindPopup("<b>Agroquímicos del Norte - Sede Atlacomulco</b>");
     
-        const clientes = JSON.parse('{{ datos_clientes_json | tojson }}');
-        var iconUrl = 'static/images/cliente.png';
+        const clientes = JSON.parse(document.getElementById("clientes-data").textContent);
+
+        const iconUrl = 'static/images/cliente.png';
     
         var selectedMarkers = [];
         var currentRoute = null;
         var counter = 0;
     
-        // Crear iconos con números
+        // Función para crear iconos numerados
         function createNumberedIcon(number) {
             return L.divIcon({
                 className: 'custom-number-icon',
-                html: `<div style="position: relative; width: 30px; height: 30px; background-color: #007bff; border-radius: 50%; color: white; font-size: 14px; display: flex; justify-content: center; align-items: center;">
+                html: `<div style="width: 30px; height: 30px; background-color: #007bff; border-radius: 50%; color: white; font-size: 14px; display: flex; justify-content: center; align-items: center;">
                            ${number}
                        </div>`,
                 iconSize: [30, 30],
@@ -74,19 +77,14 @@
             });
         }
     
-        // Crear marcadores
+        // Crear marcadores para los clientes
         var markers = [];
         clientes.forEach(function(cliente) {
             var lat = parseFloat(cliente.latitud);
             var lon = parseFloat(cliente.longitud);
     
             var marker = L.marker([lat, lon], {
-                icon: L.icon({
-                    iconUrl: iconUrl,
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 30],
-                    popupAnchor: [0, -30]
-                })
+                icon: L.icon({ iconUrl: iconUrl, iconSize: [30, 30] })
             }).addTo(map);
     
             marker.cliente = cliente; // Asociar cliente al marcador
@@ -97,23 +95,23 @@
                 <b>Municipio:</b> ${cliente.municipio}<br>
                 <b>Haga clic para seleccionar</b>
             `;
-    
             marker.bindPopup(popupContent);
     
-            // Evento click para selección de marcadores
+            // Evento click para selección/deselección de clientes
             marker.on('click', function() {
                 if (selectedMarkers.includes(marker)) {
-                    // Deseleccionar
+                    // Deseleccionar cliente
                     selectedMarkers = selectedMarkers.filter(m => m !== marker);
-                    marker.setIcon(L.icon({ iconUrl: iconUrl, iconSize: [30, 30] }));
                     counter--;
     
-                    // Actualizar los números de los marcadores seleccionados
+                    marker.setIcon(L.icon({ iconUrl: iconUrl, iconSize: [30, 30] }));
+    
+                    // Actualizar numeración de los seleccionados
                     selectedMarkers.forEach((m, index) => {
                         m.setIcon(createNumberedIcon(index + 1));
                     });
                 } else {
-                    // Seleccionar
+                    // Seleccionar cliente
                     selectedMarkers.push(marker);
                     counter++;
     
@@ -139,13 +137,10 @@
     
             return div;
         };
-        
         searchControl.addTo(map);
     
         document.getElementById('search-button').addEventListener('click', function() {
             var searchValue = document.getElementById('search-input').value.toLowerCase();
-    
-            // Buscar clientes coincidentes
             var found = markers.filter(marker => {
                 var cliente = marker.cliente;
                 return cliente.nombre.toLowerCase().includes(searchValue) || cliente.clave.toString().includes(searchValue);
@@ -154,8 +149,6 @@
             if (found.length > 0) {
                 var bounds = found.map(marker => marker.getLatLng());
                 map.fitBounds(bounds);
-    
-                // Mostrar un popup temporal para el primer cliente encontrado
                 found[0].openPopup();
             } else {
                 alert('Cliente no encontrado.');
@@ -167,20 +160,17 @@
         button.onAdd = function(map) {
             var div = L.DomUtil.create('div', 'generate-route-button');
             div.innerHTML = '<button style="padding: 5px;"><i class="bi bi-bezier"></i></button>';
-            div.style.padding = '10px';
             div.style.backgroundColor = 'white';
             div.style.borderRadius = '5px';
             div.style.marginTop = '5px';
     
             div.addEventListener('click', function() {
                 if (selectedMarkers.length < 2) {
-                    alert('Por favor selecciona al menos dos marcadores.');
+                    alert('Selecciona al menos dos clientes.');
                     return;
                 }
     
-                var waypoints = selectedMarkers.map(marker =>
-                    `${marker.getLatLng().lng},${marker.getLatLng().lat}`
-                );
+                var waypoints = selectedMarkers.map(m => `${m.getLatLng().lng},${m.getLatLng().lat}`);
                 waypoints.unshift(`${marcador1.getLatLng().lng},${marcador1.getLatLng().lat}`);
     
                 var osrmUrl = `https://router.project-osrm.org/route/v1/driving/${waypoints.join(';')}?geometries=geojson`;
@@ -189,76 +179,51 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.routes && data.routes.length > 0) {
-                            var route = data.routes[0];
-                            var distanceKm = (route.distance / 1000).toFixed(2);
-                            var durationMinutes = (route.duration / 60).toFixed(2);
+                            if (currentRoute) map.removeLayer(currentRoute);
     
-                            if (currentRoute) {
-                                map.removeLayer(currentRoute);
-                            }
-    
-                            var coordinates = route.geometry.coordinates;
-                            var latLngs = coordinates.map(coord => [coord[1], coord[0]]);
+                            var latLngs = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
                             currentRoute = L.polyline(latLngs, { color: 'blue', weight: 4 }).addTo(map);
     
-                            alert(`Ruta generada:\nDistancia total: ${distanceKm} km\nDuración estimada: ${durationMinutes} minutos`);
+                            alert(`Ruta generada:\nDistancia: ${(data.routes[0].distance / 1000).toFixed(2)} km\nTiempo estimado: ${(data.routes[0].duration / 60).toFixed(2)} min`);
                             map.fitBounds(currentRoute.getBounds());
                         } else {
-                            console.error('No se pudo generar la ruta:', data);
+                            console.error('No se pudo generar la ruta.');
                         }
                     })
                     .catch(error => console.error('Error al solicitar la ruta:', error));
             });
     
             return div;
-            
         };
         button.addTo(map);
-
-        // Botón para cancelar la generación de rutas
-var cancelButton = L.control({ position: 'topright' });
-
-cancelButton.onAdd = function(map) {
-    var div = L.DomUtil.create('div', 'cancel-route-button');
-    div.innerHTML = '<button style=" padding:5px; background-color: red; color: white;"><i class="bi bi-x-square-fill"></i></button>';
-    div.style.padding = '10px';
-    div.style.backgroundColor = 'white';
-    div.style.borderRadius = '5px';
-    div.style.marginTop = '5px';
-
-    div.addEventListener('click', function() {
-        if (currentRoute) {
-            // Eliminar la ruta del mapa
-            map.removeLayer(currentRoute);
-            currentRoute = null;
-
-            // Restaurar los íconos originales de los marcadores seleccionados
-            selectedMarkers.forEach(marker => {
-                marker.setIcon(L.icon({
-                    iconUrl: iconUrl,
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 30],
-                    popupAnchor: [0, -30]
-                }));
+    
+        // Botón para cancelar ruta
+        var cancelButton = L.control({ position: 'topright' });
+        cancelButton.onAdd = function(map) {
+            var div = L.DomUtil.create('div', 'cancel-route-button');
+            div.innerHTML = '<button style="padding:5px; background-color: red; color: white;"><i class="bi bi-x-square-fill"></i></button>';
+            div.style.backgroundColor = 'white';
+            div.style.borderRadius = '5px';
+            div.style.marginTop = '5px';
+    
+            div.addEventListener('click', function() {
+                if (currentRoute) {
+                    map.removeLayer(currentRoute);
+                    currentRoute = null;
+    
+                    selectedMarkers.forEach(marker => marker.setIcon(L.icon({ iconUrl: iconUrl, iconSize: [30, 30] })));
+                    selectedMarkers = [];
+                    counter = 0;
+    
+                    alert('Ruta cancelada.');
+                }
             });
-
-            // Limpiar la selección
-            selectedMarkers = [];
-            counter = 0;
-
-            alert('Ruta cancelada y selección reiniciada.');
-        } else {
-            alert('No hay ninguna ruta para cancelar.');
-        }
-    });
-
-    return div;
-};
-
-// Agregar el botón al mapa
-cancelButton.addTo(map);
-
+    
+            return div;
+        };
+        cancelButton.addTo(map);
     </script>
+    
     
       
       

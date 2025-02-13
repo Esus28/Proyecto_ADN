@@ -419,14 +419,16 @@ def vista_ruta():
             'nombre': cliente.nombre,
             'apellidos': cliente.apellidos,
             'vendedor': cliente.vendedor.nombre,
-            'municipio': cliente.municipio,
             'vape': cliente.vendedor.apellidos,
+            'municipio': cliente.municipio,
             'latitud': float(cliente.latitud), 
             'longitud': float(cliente.longitud),  
            
         }
         for cliente in clientes
     ]
+
+  
 
     # No necesitas usar json.dumps porque el filtro 'tojson' de Jinja2 lo hace automáticamente
     return render_template('/admin/mapa.html', datos_clientes_json=datos_clientes)
@@ -572,6 +574,7 @@ def actualizar_cliente(id):
 
     flash('Cliente editado exitosamente.', 'success')
     return redirect(url_for('clientes'))
+
 
 @app.get('/eliminar_cliente/<id>')
 def eliminar_cliente(id):
@@ -726,6 +729,7 @@ def costos():
         pagination=pagination
     )
 
+
 @app.route('/agregar_costo', methods=['GET', 'POST'])
 def agregar_costo():
     if request.method == 'GET':
@@ -810,6 +814,7 @@ def actualizar_costo(id):
 
     flash('Vehiculo editado exitosamente.', 'success')
     return redirect(url_for('vehiculos'))
+
 
 @app.get('/eliminar_costo/<id>')
 def eliminar_costo(id):
@@ -1147,8 +1152,7 @@ def generar_pdf(id_pedido):
 @app.get('/sub_vista_rutas')
 def sub_vista_ruta():
     clientes = db_session.query(models.Cliente).all()
-
-   
+    
     datos_clientes = [
         {
             'clave': cliente.clave,
@@ -1158,13 +1162,14 @@ def sub_vista_ruta():
             'vape': cliente.vendedor.apellidos,
             'municipio': cliente.municipio,
             'latitud': float(cliente.latitud), 
-            'longitud': float(cliente.longitud),  
-           
+            'longitud': float(cliente.longitud)
         }
         for cliente in clientes
     ]
 
-  
+    # Imprime en consola para verificar el JSON antes de enviarlo a la plantilla
+    print(json.dumps(datos_clientes, indent=4))
+
     return render_template('/sub_admin/mapa.html', datos_clientes_json=datos_clientes)
 
 
