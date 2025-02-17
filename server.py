@@ -1100,7 +1100,6 @@ def eliminar_pedido(id):
 
 @app.route('/generar_pdf/<int:id_pedido>')
 def generar_pdf(id_pedido):
-    # Obtener el pedido y sus relaciones
     pedido = db_session.query(models.Pedido) \
         .join(models.Repartidor) \
         .join(models.Vehiculo) \
@@ -1111,18 +1110,10 @@ def generar_pdf(id_pedido):
         flash("El pedido no existe.", "error")
         return redirect(url_for('clientes'))
 
-    # Obtener todos los clientes asignados al pedido
-    clientes = pedido.clientes  # Suponiendo que hay una relación 'clientes' en el modelo Pedido
+    clientes = pedido.clientes
 
-    # Convertir los clientes en una lista de diccionarios
-    clientes_info = [
-        {
-            "nombre": f"{cliente.nombre} {cliente.apellidos}"
-        }
-        for cliente in clientes
-    ]
+    clientes_info = [{"nombre": f"{cliente.nombre} {cliente.apellidos}"} for cliente in clientes]
 
-    # Generar el HTML para la plantilla
     html = render_template(
         'formato.html',
         no_pedido=pedido.id_pedido,
@@ -1131,16 +1122,12 @@ def generar_pdf(id_pedido):
         hora_fin=pedido.hora_fin,
         repartidor=f"{pedido.repartidor.nombre} {pedido.repartidor.apellidos}",
         vehiculo=f"{pedido.vehiculo.modelo} - {pedido.vehiculo.placas}",
-        costo=pedido.costo,
         distancia=pedido.distancia,
-        combustible=pedido.combustible,
-        clientes=clientes_info  # Pasamos la lista de clientes
+        clientes=clientes_info
     )
 
-    # Crear el PDF a partir del HTML generado
     pdf = HTML(string=html).write_pdf()
 
-    # Configurar la respuesta para enviar el PDF al navegador
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f'attachment; filename=recibo_pedido_{id_pedido}.pdf'

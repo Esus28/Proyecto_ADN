@@ -8,12 +8,6 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        .logo {
-            text-align: center;
-        }
-        .logo img {
-            width: 100px;
-        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -26,40 +20,21 @@
             padding: 10px;
             text-align: left;
         }
-       
-    </style>
-    <style>
         .firma {
             margin-top: 40px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-    
-        .firma-repartidor {
-            margin-bottom: 40px;
             text-align: center;
         }
-    
-        .firma-clientes {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            width: 100%;
-           
-        }
-    
-        .firma-cliente {
-            text-align: center;
-            margin-top: 40px;
-            max-width: 33%;
-            flex: 1;
+        .page-break {
+            page-break-after: always;
         }
     </style>
 </head>
 <body>
+
+{% for cliente in clientes %}
     <h2 style="text-align: center;">RECIBO DE PEDIDO - AGROQUÍMICOS DEL NORTE</h2>
     <p>Fecha de pedido: {{ fecha_pedido }}</p>
+    
     <table>
         <tr>
             <th>No. Pedido</th>
@@ -85,40 +60,20 @@
             <th>Distancia recorrida</th>
             <td>{{ distancia }} km</td>
         </tr>
-        <tr>
-            <th>Costo Total</th>
-            <td>${{ costo }}</td>
-        </tr>
+    
         <tr>
             <th>Cliente</th>
-            {% for cliente in clientes %}
-            <td>
-            <li>
-                <strong>Nombre:</strong> {{ cliente.nombre }} <br>
-            </li>
-            </td>
-        {% endfor %}
+            <td>{{ cliente.nombre }}</td>
         </tr>
     </table>
 
     <div class="firma">
-        <div class="firma-repartidor">
-            ______________________________<br>
-            Firma Repartidor
-        </div>
-    
-        <div class="firma-clientes">
-            {% for cliente in clientes %}
-            <div class="firma-cliente">
-                ______________________________<br>
-                Firma de {{ cliente.nombre }}
-            </div>
-            {% endfor %}
-        </div>
+        <p>______________________________</p>
+        <p>FIFRMA DE c.{{ cliente.nombre }}</p>
     </div>
-    
-    
-    
-</body>
 
+    <div class="page-break"></div> <!-- Salto de página después de cada cliente -->
+{% endfor %}
+
+</body>
 </html>
