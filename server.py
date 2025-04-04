@@ -964,7 +964,7 @@ def agregar_pedido():
     litros_consumidos = distancia * vehiculo.cpk
 
     # Calcular el costo basado en el tipo de combustible
-    precio_por_litro = 25 if combustible == "gasolina" else 30
+    precio_por_litro = 24 if combustible == "gasolina" else 25
     costo_combustible = litros_consumidos * precio_por_litro
 
     # Agregar un costo adicional por tiempo de recorrido (ejemplo: 10 por hora)
